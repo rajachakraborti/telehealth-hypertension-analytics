@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.router import api_router
 from app.core.config import settings
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,17 +17,17 @@ def _init_db():
     logger.info("Database: %s", DATABASE_URL)
     db = SessionLocal()
     try:
-        if not db.query(User).filter(User.username == "testuser").first():
-            db.add(User(
-                username="testuser",
-                email="test@example.com",
-                hashed_password="testpass123",
-                role="clinician",
-                is_active=True,
-                is_superuser=False,
-            ))
-            db.commit()
-            logger.info("Seeded default user: testuser / testpass123")
+        seed_users = [
+            {"username": "admin", "email": "admin@telehealth.com", "hashed_password": "admin123", "role": "administrator", "is_superuser": True},
+            {"username": "clinician", "email": "clinician@telehealth.com", "hashed_password": "clinician123", "role": "clinician", "is_superuser": False},
+            {"username": "analyst", "email": "analyst@telehealth.com", "hashed_password": "analyst123", "role": "data_analyst", "is_superuser": False},
+            {"username": "testuser", "email": "test@example.com", "hashed_password": "testpass123", "role": "clinician", "is_superuser": False},
+        ]
+        for u in seed_users:
+            if not db.query(User).filter(User.username == u["username"]).first():
+                db.add(User(is_active=True, **u))
+        db.commit()
+        logger.info("Seeded default users")
     finally:
         db.close()
 
@@ -41,6 +43,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve sample data files
+_STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+if os.path.isdir(_STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
 # Include the API router
 app.include_router(api_router, prefix="/api")
