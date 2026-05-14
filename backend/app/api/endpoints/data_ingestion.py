@@ -35,6 +35,7 @@ async def upload_file(file: UploadFile = File(...)):
             "filename": data["filename"],
             "rows": data["rows"],
             "columns": data["columns"],
+            "dataset_id": data["file_path"],
         }
     except HTTPException:
         raise

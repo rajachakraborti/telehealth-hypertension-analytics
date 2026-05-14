@@ -1,0 +1,1460 @@
+<h1 id="capstone-milestone-3-implementation">Capstone Milestone 3:
+Implementation</h1>
+<h2 id="telehealth-hypertension-predictive-analytics-system">Telehealth
+Hypertension Predictive Analytics System</h2>
+<p><strong>Course:</strong> CST/DSC-580<br />
+<strong>Submitted by:</strong> Raja Chakraborty<br />
+<strong>Date:</strong> May 2026</p>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>This document presents the implementation of the Telehealth
+Hypertension Predictive Analytics System. The system was designed to
+give clinicians, data analysts, and administrators a single
+browser-based platform for working with hypertension patient data, from
+raw file ingestion through machine learning model training,
+visualization, and report generation. This milestone covers four areas:
+a mapping of every functional requirement to the code that satisfies it,
+a complete listing of all source code files, the implementation plan
+describing how the system was built and deployed, and a review of the
+project requirements as they stand after implementation.</p>
+<p>The system is live at the following URLs:</p>
+<ul>
+<li><strong>Frontend:</strong>
+https://telehealth-hypertension-analytics-vercel-p45feeg88.vercel.app/</li>
+<li><strong>Backend API:</strong>
+https://telehealth-hypertension-analytics.onrender.com/</li>
+<li><strong>API Documentation:</strong>
+https://telehealth-hypertension-analytics.onrender.com/docs</li>
+</ul>
+<hr />
+<h2 id="section-1-mapping-of-functional-requirements">Section 1: Mapping
+of Functional Requirements</h2>
+<p>Each functional requirement is traced to the specific backend
+endpoints and service functions that implement it, along with the
+frontend components that expose the feature to the user.</p>
+<hr />
+<h3 id="fr1-user-registration">FR1 — User Registration</h3>
+<p>New users can create accounts through the registration form.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/auth.py</code> →
+<code>POST /api/auth/register</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>auth.py</code> → user creation logic with bcrypt password
+hashing</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/user.py</code> → <code>User</code> ORM
+model</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/UserManagement/Register.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr2-user-login-and-jwt-authentication">FR2 — User Login and JWT
+Authentication</h3>
+<p>Registered users can log in and receive a JWT token that authorizes
+all subsequent requests.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/auth.py</code> →
+<code>POST /api/auth/login</code></td>
+</tr>
+<tr>
+<td>Token Handling</td>
+<td><code>backend/app/core/security.py</code> → token creation and
+verification</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td><code>backend/app/core/config.py</code> → <code>SECRET_KEY</code>,
+token expiry settings</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/UserManagement/Login.jsx</code></td>
+</tr>
+<tr>
+<td>Context</td>
+<td><code>frontend/src/context/AuthContext.jsx</code> → stores token and
+user state globally</td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>frontend/src/services/auth.js</code> → handles login requests
+and token storage</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr3-role-based-access-control">FR3 — Role-Based Access
+Control</h3>
+<p>The system supports three roles: administrator, clinician, and data
+analyst. Each role sees different navigation options and has different
+permissions.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/auth.py</code> →
+<code>GET /api/auth/users/me</code></td>
+</tr>
+<tr>
+<td>Auth Guard</td>
+<td><code>backend/app/api/endpoints/auth.py</code> →
+<code>get_current_user()</code> dependency</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/user.py</code> → <code>role</code> and
+<code>is_superuser</code> columns</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Auth/ProtectedRoute.jsx</code> →
+blocks unauthorized routes</td>
+</tr>
+<tr>
+<td>UI</td>
+<td><code>frontend/src/components/UserManagement/RoleManagement.jsx</code>
+→ admin role panel</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr4-data-file-upload">FR4 — Data File Upload</h3>
+<p>Users can upload datasets in CSV, Excel, JSON, or Parquet format.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_ingestion.py</code> →
+<code>POST /api/data-ingestion/upload</code></td>
+</tr>
+<tr>
+<td>File Service</td>
+<td><code>backend/app/services/data_ingestion/file_handler.py</code> →
+<code>handle_file_upload()</code></td>
+</tr>
+<tr>
+<td>Validation</td>
+<td><code>backend/app/services/data_ingestion/validator.py</code> →
+extension and content checks</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td><code>backend/app/core/config.py</code> →
+<code>ALLOWED_EXTENSIONS</code>, <code>MAX_CONTENT_LENGTH</code> (16
+MB)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/dataset.py</code> → stores dataset name and
+file path</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataIngestion/FileUpload.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr5-data-import-from-url">FR5 — Data Import from URL</h3>
+<p>Users can import a dataset by providing a URL that points to a remote
+CSV or data file.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_ingestion.py</code> →
+<code>POST /api/data-ingestion/url</code></td>
+</tr>
+<tr>
+<td>URL Service</td>
+<td><code>backend/app/services/data_ingestion/url_handler.py</code> →
+<code>handle_url_import()</code></td>
+</tr>
+<tr>
+<td>API Adapter</td>
+<td><code>backend/app/services/data_ingestion/api_handler.py</code> →
+handles external API sources</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataIngestion/URLImport.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr6-summary-statistics-and-data-exploration">FR6 — Summary
+Statistics and Data Exploration</h3>
+<p>Users can view descriptive statistics (mean, median, standard
+deviation, min, max) for any uploaded dataset.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_exploration.py</code> →
+<code>POST /api/exploration/statistics</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_exploration/statistics.py</code> →
+<code>calculate_statistics()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataExploration/SummaryStatistics.jsx</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataExploration/DataTable.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr7-correlation-analysis">FR7 — Correlation Analysis</h3>
+<p>Users can view a correlation matrix showing the relationships between
+numerical columns.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_exploration.py</code> →
+<code>GET /api/exploration/visualization-data</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_exploration/visualization_data.py</code>
+→ <code>prepare_visualization_data()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataExploration/CorrelationMatrix.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr8-missing-value-imputation">FR8 — Missing Value
+Imputation</h3>
+<p>Users can fill in missing values using mean or median imputation
+strategies.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_cleaning.py</code> →
+<code>POST /api/cleaning/clean</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_cleaning/imputation.py</code> →
+<code>perform_imputation()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataCleaning/ImputationPanel.jsx</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataCleaning/PreprocessingHistory.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr9-outlier-detection-and-removal">FR9 — Outlier Detection and
+Removal</h3>
+<p>Users can flag or remove statistical outliers from their dataset.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_cleaning.py</code> →
+<code>POST /api/cleaning/clean</code> with
+<code>outlier_detection: true</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_cleaning/outlier_detection.py</code>
+→ <code>detect_outliers()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataCleaning/OutlierDetection.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr10-feature-scaling">FR10 — Feature Scaling</h3>
+<p>Users can normalize or standardize numerical features using min-max
+or z-score scaling.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_cleaning.py</code> →
+<code>POST /api/cleaning/clean</code> with
+<code>scaling_method</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_cleaning/scaling.py</code> →
+<code>scale_data()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataCleaning/ImputationPanel.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr11-categorical-encoding">FR11 — Categorical Encoding</h3>
+<p>Users can convert categorical columns into numerical representations
+using one-hot encoding.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/data_cleaning.py</code> →
+<code>POST /api/cleaning/clean</code> with
+<code>encoding_method</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_cleaning/encoding.py</code> →
+<code>encode_categorical()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/DataCleaning/ImputationPanel.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr12-machine-learning-model-training">FR12 — Machine Learning
+Model Training</h3>
+<p>Users can train logistic regression, random forest, or XGBoost
+classifiers on their cleaned dataset.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/modeling.py</code> →
+<code>POST /api/modeling/train</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/modeling/model_trainer.py</code> →
+<code>train_model()</code></td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/</code> → model metadata stored via
+SQLAlchemy</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Modeling/ModelSelection.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr13-hyperparameter-tuning">FR13 — Hyperparameter Tuning</h3>
+<p>Users can provide a parameter grid and the system finds the best
+combination using cross-validation.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/modeling.py</code> →
+<code>POST /api/modeling/tune</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/modeling/hyperparameter_tuner.py</code> →
+<code>tune_hyperparameters()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Modeling/HyperparameterTuning.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr14-model-evaluation">FR14 — Model Evaluation</h3>
+<p>Trained models can be evaluated against test data to produce
+accuracy, precision, recall, F1, ROC-AUC, and confusion matrix
+results.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/modeling.py</code> →
+<code>POST /api/modeling/evaluate</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/modeling/model_evaluator.py</code> →
+<code>evaluate_model()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Modeling/ModelSelection.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr15-model-explainability">FR15 — Model Explainability</h3>
+<p>Users can request feature importance scores to understand which
+variables drive model predictions.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/modeling.py</code> →
+<code>POST /api/modeling/explain</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/modeling/explainability.py</code> →
+<code>explain_model()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Modeling/FeatureImportance.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr16-interactive-charts-and-dashboard">FR16 — Interactive Charts
+and Dashboard</h3>
+<p>Users can view bar charts, scatter plots, histograms, and an
+aggregated metrics dashboard for their dataset.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/visualization.py</code> →
+<code>GET /api/visualization/visualizations/charts</code></td>
+</tr>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/visualization.py</code> →
+<code>GET /api/visualization/visualizations/dashboard</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_exploration/visualization_data.py</code>
+→ <code>prepare_visualization_data()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Visualization/ChartBuilder.jsx</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Visualization/Dashboard.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr17-hypertension-risk-gauge">FR17 — Hypertension Risk
+Gauge</h3>
+<p>A risk gauge visualizes the predicted hypertension risk score for the
+dataset in a clinical-friendly format.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/visualization.py</code> →
+<code>GET /api/visualization/visualizations/risk-gauge</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/data_exploration/visualization_data.py</code>
+→ <code>prepare_visualization_data()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Visualization/RiskGauge.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr18-pdf-report-generation">FR18 — PDF Report Generation</h3>
+<p>Users can generate and download a formatted PDF report summarizing
+their analysis.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/reporting.py</code> →
+<code>POST /api/reporting/reports/pdf</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/reporting/pdf_generator.py</code> →
+<code>generate_pdf_report()</code></td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/db/repositories.py</code> → stores report
+metadata</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Reporting/ReportGenerator.jsx</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Reporting/ExportOptions.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr19-csv-data-export">FR19 — CSV Data Export</h3>
+<p>Users can export cleaned or analyzed data as a downloadable CSV
+file.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/reporting.py</code> →
+<code>POST /api/reporting/reports/csv</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td><code>backend/app/services/reporting/csv_exporter.py</code> →
+<code>export_to_csv()</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Reporting/ExportOptions.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr20-pipeline-workflow-management">FR20 — Pipeline Workflow
+Management</h3>
+<p>Users can define, execute, monitor, and stop multi-step data
+processing workflows.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/pipeline.py</code> →
+<code>POST /api/pipeline/pipeline/start</code></td>
+</tr>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/pipeline.py</code> →
+<code>POST /api/pipeline/pipeline/stop</code></td>
+</tr>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/pipeline.py</code> →
+<code>GET /api/pipeline/pipeline/status</code></td>
+</tr>
+<tr>
+<td>API Endpoint</td>
+<td><code>backend/app/api/endpoints/pipeline.py</code> →
+<code>POST /api/pipeline/pipeline/execute</code></td>
+</tr>
+<tr>
+<td>Engine</td>
+<td><code>backend/app/services/pipeline/workflow_engine.py</code> →
+<code>WorkflowEngine</code> class</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td><code>backend/app/services/pipeline/step_executor.py</code> →
+individual step logic</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/pipeline.py</code> → stores step
+records</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Pipeline/PipelineControls.jsx</code></td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/components/Pipeline/WorkflowVisualizer.jsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="fr21-multiple-simultaneous-user-access">FR21 — Multiple
+Simultaneous User Access</h3>
+<p>Multiple users with different roles can use the system at the same
+time without interfering with each other.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module / Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth</td>
+<td><code>backend/app/core/security.py</code> → stateless JWT tokens, no
+shared server session</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>backend/app/models/user.py</code> → all records scoped by
+<code>user_id</code> foreign key</td>
+</tr>
+<tr>
+<td>Server</td>
+<td><code>backend/app/main.py</code> → Uvicorn ASGI server with async
+request handling</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><code>frontend/src/context/AuthContext.jsx</code> → each browser
+session maintains its own token</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="section-2-source-code-listing">Section 2: Source Code
+Listing</h2>
+<h3 id="backend-entry-point-and-configuration">Backend — Entry Point and
+Configuration</h3>
+<p><strong><code>backend/app/main.py</code></strong><br />
+Application entry point. Creates the FastAPI app instance, registers
+CORS middleware to allow cross-origin requests from the Vercel frontend,
+initializes the database by creating all tables on startup, seeds four
+default users if they do not already exist, mounts static files, and
+registers the API router under the <code>/api</code> prefix. The Uvicorn
+server reads the port from the <code>$PORT</code> environment variable,
+which Render injects automatically.</p>
+<p><strong><code>backend/app/core/config.py</code></strong><br />
+Centralized application settings. Defines a <code>Config</code> base
+class with values for <code>SECRET_KEY</code>,
+<code>DATABASE_URI</code>, <code>DEBUG</code>,
+<code>LOGGING_LEVEL</code>, <code>ALLOWED_EXTENSIONS</code>,
+<code>MAX_CONTENT_LENGTH</code>, <code>APP_HOST</code>, and
+<code>APP_PORT</code>. Three environment subclasses extend this:
+<code>ProductionConfig</code> disables debug mode,
+<code>DevelopmentConfig</code> enables it, and
+<code>TestingConfig</code> uses an in-memory SQLite database. The
+default exported instance is <code>DevelopmentConfig</code>.</p>
+<p><strong><code>backend/app/core/security.py</code></strong><br />
+Handles password hashing and JWT token creation and verification. Uses
+the <code>passlib</code> library with the bcrypt algorithm to hash
+passwords before storage and verify them at login. Generates signed JWT
+access tokens using <code>python-jose</code> and the configured
+<code>SECRET_KEY</code>.</p>
+<p><strong><code>backend/app/core/logging.py</code></strong><br />
+Configures Python’s standard logging module for the application. Sets
+the log level from <code>config.py</code> and formats log output for the
+Render log stream.</p>
+<hr />
+<h3 id="backend-api-layer">Backend — API Layer</h3>
+<p><strong><code>backend/app/api/router.py</code></strong><br />
+Aggregates all eight endpoint routers into a single
+<code>api_router</code> using FastAPI’s <code>APIRouter</code>. Assigns
+URL prefixes and tag labels to each group: <code>/auth</code>,
+<code>/data-ingestion</code>, <code>/exploration</code>,
+<code>/cleaning</code>, <code>/modeling</code>,
+<code>/visualization</code>, <code>/reporting</code>, and
+<code>/pipeline</code>.</p>
+<p><strong><code>backend/app/api/endpoints/auth.py</code></strong><br />
+Defines three routes: <code>POST /register</code> creates a new user
+with a hashed password and a default role; <code>POST /login</code>
+validates credentials and returns a JWT access token;
+<code>GET /users/me</code> returns the currently authenticated user’s
+profile. Includes the <code>get_current_user()</code> dependency
+function used by all protected routes across the application.</p>
+<p><strong><code>backend/app/api/endpoints/data_ingestion.py</code></strong><br />
+Handles incoming data files and URL-based imports. The upload endpoint
+validates the file extension against the allowed list, reads the byte
+content, and passes it to the file handler service. The URL import
+endpoint delegates to the URL handler. Both endpoints return a dataset
+record on success.</p>
+<p><strong><code>backend/app/api/endpoints/data_exploration.py</code></strong><br />
+Exposes two endpoints for exploring uploaded datasets. The statistics
+endpoint accepts a <code>dataset_id</code> and returns descriptive
+statistics computed by the service layer. The visualization data
+endpoint returns pre-formatted chart data for the frontend.</p>
+<p><strong><code>backend/app/api/endpoints/data_cleaning.py</code></strong><br />
+Accepts a <code>DataCleaningRequest</code> body containing the raw data
+and optional cleaning parameters. Applies imputation, outlier detection,
+scaling, and encoding in sequence based on which parameters are
+provided. Returns the cleaned dataset or raises an HTTP 400 error on
+failure.</p>
+<p><strong><code>backend/app/api/endpoints/modeling.py</code></strong><br />
+Handles model training and hyperparameter tuning. Defines
+<code>ModelRequest</code> and <code>ModelResponse</code> Pydantic
+schemas. The <code>/train</code> endpoint calls the model trainer
+service and returns model metrics and feature importance. The
+<code>/tune</code> endpoint runs cross-validated hyperparameter search
+and returns the best configuration.</p>
+<p><strong><code>backend/app/api/endpoints/visualization.py</code></strong><br />
+Provides three GET endpoints for chart data, dashboard aggregates, and
+the risk gauge score. All three accept a <code>dataset_id</code> query
+parameter and route through the visualization data service.</p>
+<p><strong><code>backend/app/api/endpoints/reporting.py</code></strong><br />
+Two POST endpoints for generating downloadable outputs. The PDF endpoint
+calls the report generator service using ReportLab and returns a
+formatted PDF. The CSV endpoint calls the CSV exporter and returns a
+comma-delimited file. Both endpoints return HTTP 500 on unexpected
+failures.</p>
+<p><strong><code>backend/app/api/endpoints/pipeline.py</code></strong><br />
+Manages the lifecycle of multi-step data processing pipelines. The start
+endpoint accepts a list of <code>PipelineStepSchema</code> objects and
+runs them through the <code>WorkflowEngine</code>. The stop endpoint
+halts any running pipeline. The status endpoint returns the current
+state. The execute endpoint runs a single named step.</p>
+<hr />
+<h3 id="backend-data-models">Backend — Data Models</h3>
+<p><strong><code>backend/app/models/user.py</code></strong><br />
+SQLAlchemy ORM model for the <code>users</code> table. Columns include
+<code>id</code> (primary key), <code>username</code> (unique),
+<code>email</code> (unique), <code>hashed_password</code>,
+<code>role</code>, <code>is_active</code> (defaults to true), and
+<code>is_superuser</code> (defaults to false). Includes a
+<code>__repr__</code> method for readable output in logs and
+debugging.</p>
+<p><strong><code>backend/app/models/dataset.py</code></strong><br />
+ORM model for the <code>datasets</code> table. Tracks uploaded dataset
+names, file paths, the owning user’s <code>user_id</code> foreign key,
+and timestamps for creation and last update.</p>
+<p><strong><code>backend/app/models/pipeline.py</code></strong><br />
+ORM model for the <code>pipeline_steps</code> table. Stores each step’s
+name, execution order, JSONB parameter snapshot, and timestamps. Used to
+record and audit pipeline execution history.</p>
+<hr />
+<h3 id="backend-database-layer">Backend — Database Layer</h3>
+<p><strong><code>backend/app/db/database.py</code></strong><br />
+Sets up the SQLAlchemy engine and session factory. Uses SQLite by
+default (stored as <code>telehealth.db</code> in the backend root) with
+PostgreSQL available via the <code>DATABASE_URL</code> environment
+variable. Exports <code>SessionLocal</code> for use in FastAPI
+dependency injection and <code>Base</code> as the declarative base for
+all ORM models. The <code>get_db()</code> generator yields a session and
+closes it after each request.</p>
+<p><strong><code>backend/app/db/repositories.py</code></strong><br />
+Provides data access functions for creating, reading, and updating
+records in the database. Acts as an abstraction layer between the API
+endpoints and the SQLAlchemy models.</p>
+<hr />
+<h3 id="backend-service-layer">Backend — Service Layer</h3>
+<p><strong><code>backend/app/services/data_ingestion/file_handler.py</code></strong><br />
+Reads uploaded file bytes and parses them into a pandas DataFrame
+depending on the file format. Supports CSV, Excel (xls and xlsx), JSON,
+and Parquet. Returns a structured data object for downstream
+processing.</p>
+<p><strong><code>backend/app/services/data_ingestion/url_handler.py</code></strong><br />
+Fetches data from a user-provided URL using the <code>requests</code>
+library and reads it into a DataFrame. Handles redirect following and
+basic connection error reporting.</p>
+<p><strong><code>backend/app/services/data_ingestion/api_handler.py</code></strong><br />
+Handles ingestion from external API data sources, converting API
+responses into a DataFrame that the rest of the pipeline can
+process.</p>
+<p><strong><code>backend/app/services/data_ingestion/validator.py</code></strong><br />
+Checks that uploaded files have an allowed extension, are not empty, and
+contain data that can be parsed. Returns a validation result used by the
+endpoint before proceeding with ingestion.</p>
+<p><strong><code>backend/app/services/data_exploration/statistics.py</code></strong><br />
+Computes descriptive statistics for a DataFrame using pandas. Calculates
+mean, median, standard deviation, minimum, maximum, and null counts for
+each column. Returns results as a dictionary suitable for JSON
+serialization.</p>
+<p><strong><code>backend/app/services/data_exploration/visualization_data.py</code></strong><br />
+Prepares data structures formatted for Chart.js and Plotly on the
+frontend. Builds histogram data, scatter plot coordinates, correlation
+matrices, and risk gauge scores from the dataset.</p>
+<p><strong><code>backend/app/services/data_cleaning/imputation.py</code></strong><br />
+Fills missing values in a DataFrame using mean or median strategies
+applied column-by-column to numerical fields.</p>
+<p><strong><code>backend/app/services/data_cleaning/outlier_detection.py</code></strong><br />
+Identifies and removes statistical outliers using the interquartile
+range method. Rows with values beyond 1.5 times the IQR above or below
+the quartiles are flagged for removal.</p>
+<p><strong><code>backend/app/services/data_cleaning/scaling.py</code></strong><br />
+Applies feature scaling to numerical columns. Supports min-max
+normalization (scaling to the 0–1 range) and standard (z-score) scaling
+using scikit-learn’s <code>MinMaxScaler</code> and
+<code>StandardScaler</code>.</p>
+<p><strong><code>backend/app/services/data_cleaning/encoding.py</code></strong><br />
+Converts categorical columns to binary indicator variables using pandas
+<code>get_dummies()</code> (one-hot encoding). Returns the expanded
+DataFrame with original categorical columns replaced.</p>
+<p><strong><code>backend/app/services/modeling/model_trainer.py</code></strong><br />
+Trains machine learning models using scikit-learn and XGBoost. Supports
+logistic regression, random forest, and XGBoost classifier. Splits data
+into training and test sets, fits the selected model, and returns a
+model identifier along with performance metrics and feature importance
+scores.</p>
+<p><strong><code>backend/app/services/modeling/hyperparameter_tuner.py</code></strong><br />
+Runs grid search cross-validation over a user-provided parameter grid
+using scikit-learn’s <code>GridSearchCV</code>. Returns the best
+parameter combination and the corresponding cross-validated score.</p>
+<p><strong><code>backend/app/services/modeling/model_evaluator.py</code></strong><br />
+Evaluates a trained model against held-out test data. Computes accuracy,
+precision, recall, F1 score, ROC-AUC, and a confusion matrix. Returns
+all metrics in a serializable dictionary.</p>
+<p><strong><code>backend/app/services/modeling/explainability.py</code></strong><br />
+Extracts feature importance scores from a trained model. For tree-based
+models, uses the built-in <code>feature_importances_</code> attribute.
+Returns a ranked dictionary of feature names and their importance
+values.</p>
+<p><strong><code>backend/app/services/pipeline/workflow_engine.py</code></strong><br />
+Manages the execution lifecycle of a multi-step data processing
+pipeline. Maintains current pipeline state (idle, running, stopped) and
+coordinates step execution through the <code>StepExecutor</code>.
+Provides methods to start, stop, and check pipeline status.</p>
+<p><strong><code>backend/app/services/pipeline/step_executor.py</code></strong><br />
+Executes individual pipeline steps by name. Maps step names to the
+appropriate service function (ingest, explore, clean, model, visualize,
+report) and runs it with the provided parameters.</p>
+<p><strong><code>backend/app/services/reporting/pdf_generator.py</code></strong><br />
+Generates a formatted PDF report using the ReportLab library. Builds a
+document with section headings, data tables, and summary text from the
+provided JSON analysis data. Returns the PDF as a byte stream.</p>
+<p><strong><code>backend/app/services/reporting/csv_exporter.py</code></strong><br />
+Converts a data dictionary or DataFrame into a CSV file. Uses pandas to
+write the output and returns it as a downloadable stream.</p>
+<hr />
+<h3 id="frontend-entry-point-and-routing">Frontend — Entry Point and
+Routing</h3>
+<p><strong><code>frontend/src/index.jsx</code></strong><br />
+The React application root. Renders the <code>App</code> component into
+the HTML <code>div#root</code> element and wraps it in React’s strict
+mode.</p>
+<p><strong><code>frontend/src/App.jsx</code></strong><br />
+Top-level component. Sets up React Router with all application routes:
+login, register, and all protected feature pages (ingestion,
+exploration, cleaning, modeling, visualization, reporting, pipeline,
+user management, help). Wraps all routes in the <code>AuthContext</code>
+provider.</p>
+<p><strong><code>frontend/src/index.css</code></strong><br />
+Global CSS styles and base layout rules applied across all
+components.</p>
+<hr />
+<h3 id="frontend-context-and-services">Frontend — Context and
+Services</h3>
+<p><strong><code>frontend/src/context/AuthContext.jsx</code></strong><br />
+React Context that holds the authenticated user object and JWT token.
+Provides login and logout functions. Persists the token to localStorage
+so sessions survive page refreshes. All components that need auth state
+consume this context.</p>
+<p><strong><code>frontend/src/services/api.js</code></strong><br />
+Axios HTTP client instance configured with the backend base URL from
+<code>VITE_API_URL</code>. Attaches the Authorization header with the
+stored JWT token automatically on every outgoing request. All API calls
+in the application go through this module.</p>
+<p><strong><code>frontend/src/services/auth.js</code></strong><br />
+Contains functions for making authentication-specific API calls: login,
+register, and fetch current user. Used by the login and register
+components.</p>
+<p><strong><code>frontend/src/utils/helpers.js</code></strong><br />
+General utility functions shared across components. Includes formatting
+helpers for dates, numbers, and strings used in tables and charts.</p>
+<hr />
+<h3 id="frontend-components">Frontend — Components</h3>
+<p><strong><code>frontend/src/components/Auth/ProtectedRoute.jsx</code></strong><br />
+A wrapper component that checks whether the user is authenticated before
+rendering the child route. If no token exists in the auth context, it
+redirects to the login page.</p>
+<p><strong><code>frontend/src/components/UserManagement/Login.jsx</code></strong><br />
+Login form built with Formik and Yup validation. Submits credentials to
+the auth service and stores the returned token in the auth context on
+success.</p>
+<p><strong><code>frontend/src/components/UserManagement/Register.jsx</code></strong><br />
+Registration form with fields for username, email, password, and role
+selection. Submits to the registration endpoint and redirects to login
+on success.</p>
+<p><strong><code>frontend/src/components/UserManagement/RoleManagement.jsx</code></strong><br />
+Admin-only panel for viewing and managing user roles. Visible only to
+accounts with the administrator role.</p>
+<p><strong><code>frontend/src/components/Layout/Header.jsx</code></strong><br />
+Top navigation bar showing the application name and the logged-in user’s
+role. Includes a logout button that clears the auth context.</p>
+<p><strong><code>frontend/src/components/Layout/Sidebar.jsx</code></strong><br />
+Left navigation panel with links to all feature sections. Role-based
+rendering hides sections the current user does not have access to.</p>
+<p><strong><code>frontend/src/components/Layout/Footer.jsx</code></strong><br />
+Bottom bar with application name, version, and institutional
+information.</p>
+<p><strong><code>frontend/src/components/DataIngestion/FileUpload.jsx</code></strong><br />
+Drag-and-drop and manual file upload component. Validates the file type
+on the client side before submission and shows upload progress
+feedback.</p>
+<p><strong><code>frontend/src/components/DataIngestion/URLImport.jsx</code></strong><br />
+Input form for providing a URL to a remote dataset. Submits to the URL
+import endpoint and displays a success or error message.</p>
+<p><strong><code>frontend/src/components/DataExploration/SummaryStatistics.jsx</code></strong><br />
+Displays descriptive statistics returned from the backend in a formatted
+table. Shows mean, median, standard deviation, min, max, and null counts
+per column.</p>
+<p><strong><code>frontend/src/components/DataExploration/DataTable.jsx</code></strong><br />
+Paginated data table that displays the raw rows of an uploaded dataset.
+Supports sorting by column.</p>
+<p><strong><code>frontend/src/components/DataExploration/CorrelationMatrix.jsx</code></strong><br />
+Renders a Plotly heatmap showing the correlation matrix for the
+dataset’s numerical columns.</p>
+<p><strong><code>frontend/src/components/DataCleaning/ImputationPanel.jsx</code></strong><br />
+Form for selecting imputation strategy, scaling method, and encoding
+method. Submits all selected cleaning options in a single request.</p>
+<p><strong><code>frontend/src/components/DataCleaning/OutlierDetection.jsx</code></strong><br />
+Panel for toggling outlier detection. Displays the number of rows
+removed and previews the cleaned dataset.</p>
+<p><strong><code>frontend/src/components/DataCleaning/PreprocessingHistory.jsx</code></strong><br />
+Shows a log of cleaning operations applied to the current dataset in the
+current session.</p>
+<p><strong><code>frontend/src/components/Modeling/ModelSelection.jsx</code></strong><br />
+Dropdown and configuration form for choosing a model type, selecting
+feature columns and the target column, and submitting a training
+request. Displays accuracy metrics after training.</p>
+<p><strong><code>frontend/src/components/Modeling/HyperparameterTuning.jsx</code></strong><br />
+UI for entering a parameter grid and submitting a tuning request.
+Displays the best parameter set and score returned by the backend.</p>
+<p><strong><code>frontend/src/components/Modeling/FeatureImportance.jsx</code></strong><br />
+Bar chart showing feature importance scores for the trained model using
+Chart.js.</p>
+<p><strong><code>frontend/src/components/Visualization/Dashboard.jsx</code></strong><br />
+Aggregated metrics dashboard showing key statistics and charts for the
+selected dataset. Uses a grid layout from Material-UI.</p>
+<p><strong><code>frontend/src/components/Visualization/ChartBuilder.jsx</code></strong><br />
+Interactive chart builder that lets users select chart type and axis
+columns to build custom Plotly visualizations.</p>
+<p><strong><code>frontend/src/components/Visualization/RiskGauge.jsx</code></strong><br />
+Displays a react-gauge-chart visualization showing the hypertension risk
+score for the current dataset. Color-coded from low to high risk.</p>
+<p><strong><code>frontend/src/components/Reporting/ReportGenerator.jsx</code></strong><br />
+Form for selecting report content and triggering PDF generation. Shows a
+preview area where the generated report is presented before
+download.</p>
+<p><strong><code>frontend/src/components/Reporting/ExportOptions.jsx</code></strong><br />
+Buttons for downloading the current dataset or analysis results as a CSV
+file.</p>
+<p><strong><code>frontend/src/components/Pipeline/PipelineControls.jsx</code></strong><br />
+Control panel for starting, stopping, and monitoring a pipeline run.
+Displays the current step and overall status.</p>
+<p><strong><code>frontend/src/components/Pipeline/WorkflowVisualizer.jsx</code></strong><br />
+A visual representation of the pipeline steps showing each stage as a
+node in a horizontal flow diagram. Steps are highlighted as they
+complete.</p>
+<p><strong><code>frontend/src/components/Help/Help.jsx</code></strong><br />
+Help and documentation page explaining each feature of the application
+in plain language for non-technical users.</p>
+<hr />
+<h3 id="database-and-infrastructure">Database and Infrastructure</h3>
+<p><strong><code>database/migrations/init_schema.sql</code></strong><br />
+DDL script that drops and recreates the five production tables:
+<code>users</code>, <code>datasets</code>, <code>models</code>,
+<code>reports</code>, and <code>pipeline_steps</code>. Run once against
+the managed PostgreSQL instance on first deployment.</p>
+<p><strong><code>database/seeds/sample_users.sql</code></strong><br />
+SQL INSERT statements that create three test accounts: admin, a
+clinician (john_doe), and a data analyst (jane_smith). Used for initial
+testing.</p>
+<p><strong><code>docker/docker-compose.yml</code></strong><br />
+Docker Compose configuration orchestrating three services: the React
+frontend on port 3000, the FastAPI backend on port 8000, and a
+PostgreSQL 15 database on port 5432. Used for local development and
+testing.</p>
+<p><strong><code>docker/Dockerfile.backend</code></strong><br />
+Dockerfile for the Python backend. Installs dependencies from
+<code>requirements.txt</code> and starts the Uvicorn server.</p>
+<p><strong><code>docker/Dockerfile.frontend</code></strong><br />
+Dockerfile for the React frontend. Runs <code>npm install</code> and
+<code>npm run build</code> to produce the static site.</p>
+<p><strong><code>render.yaml</code></strong><br />
+Render.com deployment configuration. Defines the backend web service as
+a Python application running in the Oregon region, with
+<code>DATABASE_URL</code> and <code>SECRET_KEY</code> as injected
+environment variables.</p>
+<p><strong><code>backend/requirements.txt</code></strong><br />
+Python dependency manifest listing all required packages with pinned
+versions including FastAPI, SQLAlchemy, scikit-learn, XGBoost,
+ReportLab, pandas, NumPy, and related libraries.</p>
+<p><strong><code>frontend/package.json</code></strong><br />
+Node.js dependency manifest listing all required packages including
+React, Vite, Axios, Material-UI, Chart.js, Plotly.js, Formik, and
+testing libraries.</p>
+<hr />
+<h2 id="section-3-implementation-plan">Section 3: Implementation
+Plan</h2>
+<h3 id="strategy">Strategy</h3>
+<p>The implementation followed an iterative approach. The backend API
+was built and verified first, then the frontend was developed to consume
+it. This order was chosen because all frontend features depend on having
+stable API contracts to work against. Docker Compose was used throughout
+local development to run all three tiers simultaneously without
+environment configuration drift.</p>
+<p>The system was built in five layers: the database schema, the ORM
+models, the service layer, the API endpoints, and finally the frontend
+components. Each layer was tested before the next was started.</p>
+<h3 id="software-and-library-integration">Software and Library
+Integration</h3>
+<p>The following external software was integrated:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Integration</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL 15</td>
+<td>Production relational database for all persistent data</td>
+</tr>
+<tr>
+<td>SQLAlchemy 2.0</td>
+<td>Object-relational mapping between Python classes and database
+tables</td>
+</tr>
+<tr>
+<td>FastAPI 0.104</td>
+<td>REST API framework providing automatic Swagger UI documentation</td>
+</tr>
+<tr>
+<td>Uvicorn</td>
+<td>ASGI server that runs the FastAPI application</td>
+</tr>
+<tr>
+<td>scikit-learn 1.3</td>
+<td>Logistic regression, random forest, GridSearchCV, and preprocessing
+tools</td>
+</tr>
+<tr>
+<td>XGBoost 2.0</td>
+<td>Gradient boosting classifier for predictive modeling</td>
+</tr>
+<tr>
+<td>ReportLab 4.0</td>
+<td>PDF document generation from structured data</td>
+</tr>
+<tr>
+<td>pandas 2.1</td>
+<td>In-memory data manipulation for all data processing operations</td>
+</tr>
+<tr>
+<td>React 18 + Vite</td>
+<td>Frontend framework and build tool</td>
+</tr>
+<tr>
+<td>Axios 1.3</td>
+<td>HTTP client for API communication from the frontend</td>
+</tr>
+<tr>
+<td>Chart.js 4.2 + Plotly.js 2.18</td>
+<td>Charting libraries for visualizations</td>
+</tr>
+<tr>
+<td>Material-UI 5.11</td>
+<td>Component library providing layout, forms, and tables</td>
+</tr>
+<tr>
+<td>python-jose</td>
+<td>JWT token signing and verification</td>
+</tr>
+<tr>
+<td>passlib + bcrypt</td>
+<td>Password hashing and verification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-as-an-operational-system">Deployment as an
+Operational System</h3>
+<p>The system is deployed across two cloud platforms:</p>
+<p><strong>Backend on Render.com:</strong> The FastAPI application runs
+as a Python web service on Render’s free tier in the Oregon region.
+Render reads the <code>render.yaml</code> configuration from the
+repository and builds the backend by installing
+<code>requirements.txt</code>, then starts the server with
+<code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code>. A managed
+PostgreSQL 15 instance is connected through the
+<code>DATABASE_URL</code> environment variable. Render handles TLS
+termination, so all traffic is served over HTTPS. New deployments are
+triggered automatically whenever code is pushed to the <code>main</code>
+branch on GitHub.</p>
+<p><strong>Frontend on Vercel:</strong> The React application is
+deployed as a static site. Vercel runs <code>npm run build</code>, takes
+the output from the <code>dist</code> directory, and distributes it
+globally through its edge network. The <code>VITE_API_URL</code>
+environment variable is set in the Vercel project settings to point to
+the Render backend. Vercel also triggers automatic redeployment on every
+push to <code>main</code>.</p>
+<h3 id="potential-impacts-and-risk-mitigation">Potential Impacts and
+Risk Mitigation</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Render free tier cold start</td>
+<td>30 to 60 second delay on first request after idle period</td>
+<td>Navigate to <code>/docs</code> before evaluation to wake the
+service</td>
+</tr>
+<tr>
+<td>File persistence on Render</td>
+<td>Uploaded files may be lost on service restart</td>
+<td>Files are read into memory and processed; metadata stored in
+PostgreSQL</td>
+</tr>
+<tr>
+<td>Synchronous ML training</td>
+<td>Long training jobs block the request thread</td>
+<td>Free-tier acceptable for academic use; Render Starter tier removes
+timeout constraint</td>
+</tr>
+<tr>
+<td>Database connection loss</td>
+<td>API returns 500 errors until reconnected</td>
+<td>SQLAlchemy connection pooling recovers automatically; Render managed
+DB has uptime SLA</td>
+</tr>
+<tr>
+<td>CORS misconfiguration</td>
+<td>Frontend cannot reach backend from new domain</td>
+<td><code>allow_origins=["*"]</code> is configured; production would
+restrict to known origins</td>
+</tr>
+</tbody>
+</table>
+<h3 id="activities-completed">Activities Completed</h3>
+<ol type="1">
+<li>Database schema designed and implemented in
+<code>init_schema.sql</code></li>
+<li>SQLAlchemy ORM models created for <code>users</code>,
+<code>datasets</code>, and <code>pipeline_steps</code></li>
+<li>Core security layer built with bcrypt password hashing and JWT token
+management</li>
+<li>All eight API route groups implemented with Pydantic request and
+response validation</li>
+<li>Service layer implemented with separate modules for each domain
+area</li>
+<li>React frontend built with 30+ components organized by feature
+area</li>
+<li>Authentication flow implemented end-to-end with context-based state
+management</li>
+<li>Docker Compose configuration created for consistent local
+development</li>
+<li>Render and Vercel deployment configurations finalized</li>
+<li>Database seeded with four default users covering all three
+roles</li>
+<li>End-to-end tests run with Playwright and pytest before production
+deployment</li>
+<li>Both platforms deployed and verified against the operational
+readiness checklist</li>
+</ol>
+<hr />
+<h2 id="section-4-project-requirements-review">Section 4: Project
+Requirements Review</h2>
+<h3 id="review-of-milestone-1-requirements-and-design">Review of
+Milestone 1 — Requirements and Design</h3>
+<p>The original system requirements identified five core capabilities:
+data ingestion, data exploration, predictive modeling, visualization,
+and reporting. All five have been fully implemented. An additional
+capability was added during implementation: the pipeline workflow
+system, which allows users to chain the five core stages into a single
+automated run. This addition was not in the original plan but emerged
+naturally from the need to support non-technical clinician users who
+benefit from a guided, sequential workflow rather than navigating each
+feature independently.</p>
+<p>The role-based access system was also refined. The original design
+identified two roles (admin and user). Implementation expanded this to
+three distinct roles: administrator, clinician, and data analyst. This
+change better reflects the real-world stakeholders in a telehealth
+environment and allows the interface to be tailored more precisely to
+each user type.</p>
+<h3 id="review-of-milestone-2-architecture-and-database-design">Review
+of Milestone 2 — Architecture and Database Design</h3>
+<p>The architecture planned in Milestone 2 described a three-tier
+system: frontend, backend, and database. This structure was implemented
+exactly as planned. The one notable deviation is the database engine:
+the original design specified PostgreSQL as the primary database, and
+while PostgreSQL is used in production, the development and testing
+environment defaults to SQLite. This was a pragmatic decision that
+simplified local development setup significantly without affecting
+production behavior, since SQLAlchemy abstracts the SQL dialect
+differences.</p>
+<p>The five database tables defined in the migration script
+(<code>users</code>, <code>datasets</code>, <code>models</code>,
+<code>reports</code>, <code>pipeline_steps</code>) match the entity
+relationships described in the Milestone 2 data model. The
+<code>models</code> and <code>reports</code> tables use JSONB columns to
+store flexible parameter sets and result data without requiring schema
+changes every time a new model type or report format is introduced.</p>
+<h3 id="changes-and-corrections">Changes and Corrections</h3>
+<p>The following updates were made based on implementation findings:</p>
+<ul>
+<li>The <code>models</code> table was added to the production schema. It
+was described in Milestone 2 but not originally included in
+<code>init_schema.sql</code>. This was corrected during
+implementation.</li>
+<li>The frontend originally planned to use only Chart.js for all
+visualizations. During implementation, Plotly.js was added to handle
+interactive heatmaps for the correlation matrix, which Chart.js does not
+support natively.</li>
+<li>The <code>DataCleaningRequest</code> schema was extended to support
+all four cleaning operations in a single API call rather than requiring
+four separate requests. This reduced frontend complexity and improved
+the user experience.</li>
+<li>The help page (<code>Help.jsx</code>) was added as an unplanned
+component in response to feedback from informal user testing, which
+revealed that non-technical users needed in-application guidance on what
+each feature does.</li>
+</ul>
+<h3 id="current-status">Current Status</h3>
+<p>All 21 functional requirements defined in Section 1 have been
+implemented and verified in the live deployment. The system is
+accessible from any modern browser, supports multiple simultaneous
+authenticated users, and covers the complete data science workflow from
+raw data import through report generation. The codebase is deployed on
+GitHub and connected to both Render and Vercel for continuous
+delivery.</p>
+<hr />
+<h2 id="references">References</h2>
+<p>Géron, A. (2022). <em>Hands-on machine learning with Scikit-Learn,
+Keras, and TensorFlow</em> (3rd ed.). O’Reilly Media.</p>
+<p>McKinney, W. (2022). <em>Python for data analysis</em> (3rd ed.).
+O’Reilly Media.</p>
+<p>Ramirez, S. (2023). <em>FastAPI documentation</em>.
+https://fastapi.tiangolo.com</p>
+<p>Render. (2024). <em>Render documentation: Web services</em>.
+https://render.com/docs/web-services</p>
+<p>Vercel. (2024). <em>Vercel documentation: Deploying React
+applications</em>. https://vercel.com/docs</p>
+<p>XGBoost Developers. (2024). <em>XGBoost documentation</em>.
+https://xgboost.readthedocs.io</p>

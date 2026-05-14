@@ -1,4 +1,4 @@
-from sklearn.impute import SimpleImputer
+from sklearn.impute import SimpleImputer, KNNImputer
 import pandas as pd
 
 class DataImputer:
@@ -35,6 +35,27 @@ def mean_imputation(data: pd.DataFrame, column: str) -> pd.Series:
 
 def median_imputation(data: pd.DataFrame, column: str) -> pd.Series:
     return data[column].fillna(data[column].median())
+
+
+def perform_imputation_df(df: pd.DataFrame, method: str) -> pd.DataFrame:
+    """Apply imputation to a DataFrame in-place on numeric columns."""
+    df = df.copy()
+    numeric_cols = df.select_dtypes(include='number').columns
+    if len(numeric_cols) == 0:
+        return df
+
+    if method == 'mice':
+        from sklearn.experimental import enable_iterative_imputer  # noqa: F401
+        from sklearn.impute import IterativeImputer
+        imputer = IterativeImputer(random_state=42, max_iter=10)
+    elif method == 'knn':
+        imputer = KNNImputer(n_neighbors=5)
+    else:
+        strategy = method if method in ('mean', 'median', 'most_frequent') else 'mean'
+        imputer = SimpleImputer(strategy=strategy)
+
+    df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
+    return df
 
 
 def perform_imputation(data: list, method: str) -> list:

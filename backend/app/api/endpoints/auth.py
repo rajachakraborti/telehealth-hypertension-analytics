@@ -21,7 +21,11 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-    role: str = "clinician"  # <-- Default value
+    role: str = "clinician"
+
+
+class RoleUpdate(BaseModel):
+    role: str
 
 
 class Token(BaseModel):
@@ -105,8 +109,31 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 @router.get("/users/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    """Get current user info."""
+    return {"id": current_user.id, "username": current_user.username}
+
+
+@router.get("/users/roles")
+async def get_user_roles(db: Session = Depends(get_db)):
+    users = db.query(User).all()
     return {
-        "id": current_user.id,
-        "username": current_user.username
+        "users": [
+            {
+                "id": u.id,
+                "username": u.username,
+                "email": u.email,
+                "role": u.role,
+                "is_active": u.is_active,
+            }
+            for u in users
+        ]
     }
+
+
+@router.put("/users/{user_id}/role")
+async def update_user_role(user_id: int, body: RoleUpdate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.role = body.role
+    db.commit()
+    return {"msg": "Role updated", "user_id": user_id, "role": body.role}

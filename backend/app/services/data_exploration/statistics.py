@@ -1,5 +1,19 @@
+import math
+import os
 from scipy import stats
 import pandas as pd
+
+
+def _scalar(val):
+    """Convert numpy scalar to a JSON-safe Python type; NaN becomes None."""
+    if val is None:
+        return None
+    try:
+        f = float(val)
+        return None if math.isnan(f) or math.isinf(f) else f
+    except (TypeError, ValueError):
+        return val
+
 
 def calculate_summary_statistics(data) -> dict:
     """Calculate summary statistics for the given DataFrame or list of dicts."""
@@ -9,11 +23,11 @@ def calculate_summary_statistics(data) -> dict:
         df = data
     summary = {}
     for col in df.select_dtypes(include='number').columns:
-        summary[f'mean_{col}'] = df[col].mean()
-        summary[f'median_{col}'] = df[col].median()
-        summary[f'std_{col}'] = df[col].std()
-        summary[f'min_{col}'] = df[col].min()
-        summary[f'max_{col}'] = df[col].max()
+        summary[f'mean_{col}'] = _scalar(df[col].mean())
+        summary[f'median_{col}'] = _scalar(df[col].median())
+        summary[f'std_{col}'] = _scalar(df[col].std())
+        summary[f'min_{col}'] = _scalar(df[col].min())
+        summary[f'max_{col}'] = _scalar(df[col].max())
     return summary
 
 def calculate_correlation_matrix(data: pd.DataFrame) -> pd.DataFrame:
@@ -48,22 +62,30 @@ def calculate_missing_data_statistics(data: pd.DataFrame) -> dict:
     return missing_data_stats
 
 
+def load_dataframe(file_path: str) -> pd.DataFrame:
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".csv":
+        return pd.read_csv(file_path)
+    elif ext in (".xls", ".xlsx"):
+        return pd.read_excel(file_path)
+    elif ext == ".json":
+        return pd.read_json(file_path)
+    elif ext == ".parquet":
+        return pd.read_parquet(file_path)
+    else:
+        raise ValueError(f"Unsupported file type: {ext}")
+
+
 def calculate_statistics(dataset_id: str) -> dict:
-    """
-    Calculate comprehensive statistics for a dataset.
+    df = load_dataframe(dataset_id)
 
-    Args:
-        dataset_id: Identifier for the dataset to analyze
-
-    Returns:
-        Dictionary containing various statistical measures
-    """
-    # For now, return a placeholder structure
-    # In a real implementation, this would load the dataset by ID
+    summary = calculate_summary_statistics(df)
+    missing = calculate_missing_data_statistics(df)
+    missing_pct = {k: _scalar(v) for k, v in missing["missing_percentage"].to_dict().items()}
     return {
-        "dataset_id": dataset_id,
-        "summary": {},
-        "correlation": {},
-        "missing_data": {},
-        "distributions": {}
+        **summary,
+        "total_missing": int(missing["total_missing"]),
+        "missing_percentage": missing_pct,
+        "row_count": len(df),
+        "column_count": len(df.columns),
     }

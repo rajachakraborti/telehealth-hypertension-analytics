@@ -24,14 +24,49 @@ export const fetchSummaryStatistics = async (datasetId) => {
   return response.data;
 };
 
+export const fetchDashboard = async (datasetId) => {
+  const response = await api.post('/api/exploration/dashboard', { dataset_id: datasetId });
+  return response.data;
+};
+
+export const fetchDataPreview = async (datasetId) => {
+  const response = await api.post('/api/exploration/preview', { dataset_id: datasetId });
+  return response.data;
+};
+
 export const fetchCorrelationMatrix = async (datasetId) => {
-  const response = await api.get(`/api/exploration/correlation/${datasetId}`);
+  const response = await api.post('/api/exploration/correlation', { dataset_id: datasetId });
   return response.data;
 };
 
 // Pipeline Management
 export const fetchWorkflowData = async () => {
-  const response = await api.get('/api/pipeline/pipeline/status');
+  const response = await api.get('/api/pipeline/workflow');
+  return response.data;
+};
+
+export const startPipeline = async () => {
+  const response = await api.post('/api/pipeline/start');
+  return response.data;
+};
+
+export const stopPipeline = async () => {
+  const response = await api.post('/api/pipeline/stop');
+  return response.data;
+};
+
+export const resetPipeline = async () => {
+  const response = await api.post('/api/pipeline/reset');
+  return response.data;
+};
+
+export const advancePipeline = async () => {
+  const response = await api.post('/api/pipeline/advance');
+  return response.data;
+};
+
+export const fetchPipelineStatus = async () => {
+  const response = await api.get('/api/pipeline/status');
   return response.data;
 };
 
@@ -51,16 +86,18 @@ export const importFromUrl = async (url) => {
 };
 
 // Data Cleaning
+export const imputeData = async (datasetId, method) => {
+  const response = await api.post('/api/cleaning/impute', { dataset_id: datasetId, imputation_method: method });
+  return response.data;
+};
+
 export const cleanData = async (datasetId, options) => {
   const response = await api.post('/api/cleaning/clean', options);
   return response.data;
 };
 
-export const detectOutliers = async (data) => {
-  const response = await api.post('/api/cleaning/clean', {
-    data,
-    outlier_detection: true
-  });
+export const detectOutliers = async (datasetId, method = 'iqr') => {
+  const response = await api.post('/api/cleaning/detect-outliers', { dataset_id: datasetId, method });
   return response.data;
 };
 
@@ -72,6 +109,11 @@ export const fetchModels = async () => {
 
 export const trainModel = async (modelConfig) => {
   const response = await api.post('/api/modeling/train', modelConfig);
+  return response.data;
+};
+
+export const fetchAvailableModels = async () => {
+  const response = await api.get('/api/modeling/models');
   return response.data;
 };
 
@@ -106,26 +148,43 @@ export const fetchHyperparameterOptions = async (modelType) => {
   return options[modelType] || {};
 };
 
-export const tuneHyperparameters = async (modelConfig) => {
-  const response = await api.post('/api/modeling/tune', modelConfig);
+export const tuneHyperparameters = async (tuningConfig) => {
+  const response = await api.post('/api/modeling/tune', tuningConfig);
   return response.data;
 };
 
 // Reporting
-export const generateReport = async (reportConfig) => {
-  const response = await api.post('/api/reporting/reports/pdf', reportConfig);
-  return response.data;
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
-export const exportToCsv = async (data) => {
-  const response = await api.post('/api/reporting/reports/csv', data);
-  return response.data;
+export const generateReport = async (datasetId, title) => {
+  const response = await api.post(
+    '/api/reporting/reports/pdf',
+    { dataset_id: datasetId, title },
+    { responseType: 'blob' }
+  );
+  downloadBlob(response.data, 'hypertension_report.pdf');
+};
+
+export const exportToCsv = async (datasetId) => {
+  const response = await api.post(
+    '/api/reporting/reports/csv',
+    { dataset_id: datasetId },
+    { responseType: 'blob' }
+  );
+  downloadBlob(response.data, 'hypertension_data.csv');
 };
 
 // User Management
 export const getUserRoles = async () => {
   const response = await api.get('/api/auth/users/roles');
-  return response.data;
+  return response.data.users;
 };
 
 export const updateUserRole = async (userId, role) => {

@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Deployment Plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Deployment Plan</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#deployment-plan-telehealth-hypertension-predictive-analytics-system"
+id="toc-deployment-plan-telehealth-hypertension-predictive-analytics-system">Deployment
+Plan: Telehealth Hypertension Predictive Analytics System</a>
+<ul>
+<li><a href="#overview" id="toc-overview">Overview</a>
+<ul>
+<li><a href="#cloud-platforms-selected"
+id="toc-cloud-platforms-selected">Cloud Platforms Selected</a></li>
+<li><a href="#deployment-activities-completed"
+id="toc-deployment-activities-completed">Deployment Activities
+Completed</a></li>
+</ul></li>
+<li><a href="#assumptions-dependencies-and-constraints"
+id="toc-assumptions-dependencies-and-constraints">Assumptions,
+Dependencies, and Constraints</a>
+<ul>
+<li><a href="#assumptions" id="toc-assumptions">Assumptions</a></li>
+<li><a href="#dependencies" id="toc-dependencies">Dependencies</a></li>
+<li><a href="#constraints" id="toc-constraints">Constraints</a></li>
+</ul></li>
+<li><a href="#operational-readiness"
+id="toc-operational-readiness">Operational Readiness</a></li>
+<li><a href="#data-conversion" id="toc-data-conversion">Data
+Conversion</a>
+<ul>
+<li><a href="#seeded-default-users" id="toc-seeded-default-users">Seeded
+Default Users</a></li>
+</ul></li>
+<li><a href="#phased-rollout" id="toc-phased-rollout">Phased Rollout</a>
+<ul>
+<li><a href="#phase-1-infrastructure-provisioning-day-1"
+id="toc-phase-1-infrastructure-provisioning-day-1">Phase 1 —
+Infrastructure Provisioning (Day 1)</a></li>
+<li><a href="#phase-2-backend-api-verification-day-1-and-2"
+id="toc-phase-2-backend-api-verification-day-1-and-2">Phase 2 — Backend
+API Verification (Day 1 and 2)</a></li>
+<li><a href="#phase-3-frontend-deployment-day-2"
+id="toc-phase-3-frontend-deployment-day-2">Phase 3 — Frontend Deployment
+(Day 2)</a></li>
+<li><a href="#phase-4-feature-verification-day-3"
+id="toc-phase-4-feature-verification-day-3">Phase 4 — Feature
+Verification (Day 3)</a></li>
+<li><a
+href="#phase-5-multiple-user-and-report-demonstration-day-3-and-4"
+id="toc-phase-5-multiple-user-and-report-demonstration-day-3-and-4">Phase
+5 — Multiple User and Report Demonstration (Day 3 and 4)</a></li>
+<li><a href="#phase-6-stakeholder-release-day-4"
+id="toc-phase-6-stakeholder-release-day-4">Phase 6 — Stakeholder Release
+(Day 4)</a></li>
+</ul></li>
+<li><a href="#test-plan" id="toc-test-plan">Test Plan</a>
+<ul>
+<li><a href="#authentication-tests"
+id="toc-authentication-tests">Authentication Tests</a></li>
+<li><a href="#data-ingestion-tests" id="toc-data-ingestion-tests">Data
+Ingestion Tests</a></li>
+<li><a href="#data-exploration-tests"
+id="toc-data-exploration-tests">Data Exploration Tests</a></li>
+<li><a href="#data-cleaning-tests" id="toc-data-cleaning-tests">Data
+Cleaning Tests</a></li>
+<li><a href="#modeling-tests" id="toc-modeling-tests">Modeling
+Tests</a></li>
+<li><a href="#visualization-tests"
+id="toc-visualization-tests">Visualization Tests</a></li>
+<li><a href="#reporting-tests" id="toc-reporting-tests">Reporting
+Tests</a></li>
+<li><a href="#pipeline-tests" id="toc-pipeline-tests">Pipeline
+Tests</a></li>
+<li><a href="#multiple-user-concurrent-access-tests"
+id="toc-multiple-user-concurrent-access-tests">Multiple User Concurrent
+Access Tests</a></li>
+<li><a href="#security-tests" id="toc-security-tests">Security
+Tests</a></li>
+</ul></li>
+<li><a href="#support" id="toc-support">Support</a>
+<ul>
+<li><a href="#user-credentials-for-testing"
+id="toc-user-credentials-for-testing">User Credentials for
+Testing</a></li>
+<li><a href="#self-service-documentation"
+id="toc-self-service-documentation">Self-Service Documentation</a></li>
+<li><a href="#user-training-workflow-guide"
+id="toc-user-training-workflow-guide">User Training Workflow
+Guide</a></li>
+<li><a href="#administrator-tasks"
+id="toc-administrator-tasks">Administrator Tasks</a></li>
+</ul></li>
+<li><a href="#release-planning" id="toc-release-planning">Release
+Planning</a>
+<ul>
+<li><a href="#production-release-artifacts"
+id="toc-production-release-artifacts">Production Release
+Artifacts</a></li>
+<li><a href="#evidence-of-deployment"
+id="toc-evidence-of-deployment">Evidence of Deployment</a></li>
+<li><a href="#contingency-plans" id="toc-contingency-plans">Contingency
+Plans</a></li>
+<li><a href="#post-release-monitoring"
+id="toc-post-release-monitoring">Post-Release Monitoring</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="deployment-plan-telehealth-hypertension-predictive-analytics-system">Deployment
+Plan: Telehealth Hypertension Predictive Analytics System</h1>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>The Telehealth Hypertension Predictive Analytics System is a cloud
+deployed, full stack data product designed for three types of users:
+administrators, clinicians, and data analysts. The system gives these
+users a secure, browser based way to work with hypertension patient
+data, from uploading raw files all the way through building predictive
+models and generating reports. The goal is to support telehealth care
+teams that are spread across different locations and need access to the
+same analytical tools without installing anything locally.</p>
+<p>The product is now live across two cloud platforms:</p>
+<ul>
+<li><strong>Frontend (Vercel):</strong>
+https://telehealth-hypertension-analytics-vercel-p45feeg88.vercel.app/</li>
+<li><strong>Backend API (Render):</strong>
+https://telehealth-hypertension-analytics.onrender.com/</li>
+<li><strong>Interactive API Docs:</strong>
+https://telehealth-hypertension-analytics.onrender.com/docs</li>
+</ul>
+<h3 id="cloud-platforms-selected">Cloud Platforms Selected</h3>
+<p><strong>Render.com</strong> hosts the Python FastAPI backend. Render
+was the right choice here because the repository already had a
+<code>render.yaml</code> configuration file pointing to the Oregon
+region on a free tier Python web service. It handles ASGI applications
+through Uvicorn, manages PostgreSQL databases, provisions TLS
+certificates automatically, and rolls out new versions whenever code is
+pushed to GitHub. None of the underlying server infrastructure needs to
+be managed manually. The backend runs via
+<code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code>, with
+<code>DATABASE_URL</code> and an automatically generated
+<code>SECRET_KEY</code> provided as environment variables at
+startup.</p>
+<p><strong>Vercel</strong> hosts the React/Vite frontend as a static
+site distributed globally through its edge network. Pages load in under
+100ms for most users regardless of location. The build process runs
+automatically using <code>npm run build</code> and serves the output
+from the <code>dist</code> directory. Each GitHub branch also gets its
+own preview URL, which made testing easy before the final version went
+live. The frontend talks to the Render backend through
+<code>VITE_API_URL</code>, and CORS is configured on the API side to
+accept requests from the Vercel domain.</p>
+<h3 id="deployment-activities-completed">Deployment Activities
+Completed</h3>
+<ul>
+<li>Provisioned managed PostgreSQL on Render</li>
+<li>Injected environment variables (<code>DATABASE_URL</code>,
+<code>SECRET_KEY</code>)</li>
+<li>Executed <code>init_schema.sql</code> to create the five production
+tables</li>
+<li>Seeded four default accounts via <code>sample_users.sql</code></li>
+<li>Built and deployed the Docker based backend service</li>
+<li>Connected the Vercel frontend to the live API base URL</li>
+</ul>
+<hr />
+<h2 id="assumptions-dependencies-and-constraints">Assumptions,
+Dependencies, and Constraints</h2>
+<h3 id="assumptions">Assumptions</h3>
+<ul>
+<li>The instructor has a modern browser (Chrome, Firefox, Edge) and
+internet access.</li>
+<li>The Render free tier web service is active. If it has been idle for
+a while, the first request may take 30 to 60 seconds while the service
+wakes up. After that, responses return to normal speed.</li>
+<li>The PostgreSQL instance on Render keeps its data between deploys
+unless it is manually reset.</li>
+<li>Opening up CORS to all origins is acceptable in this academic
+context.</li>
+</ul>
+<h3 id="dependencies">Dependencies</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend runtime</td>
+<td>Python / FastAPI / Uvicorn</td>
+<td>3.11 / 0.104.1</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>SQLAlchemy</td>
+<td>2.0.23</td>
+</tr>
+<tr>
+<td>Database driver</td>
+<td>psycopg2-binary</td>
+<td>latest</td>
+</tr>
+<tr>
+<td>ML</td>
+<td>scikit-learn / XGBoost</td>
+<td>1.3.2 / 2.0.3</td>
+</tr>
+<tr>
+<td>PDF generation</td>
+<td>ReportLab</td>
+<td>4.0.7</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>React / Vite</td>
+<td>18.2.0 / 4.1.0</td>
+</tr>
+<tr>
+<td>HTTP client</td>
+<td>Axios</td>
+<td>1.3.0</td>
+</tr>
+<tr>
+<td>Charting</td>
+<td>Chart.js / Plotly.js</td>
+<td>4.2.0 / 2.18.0</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>Material-UI</td>
+<td>5.11.0</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL (Render managed)</td>
+<td>15</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub to Render and Vercel</td>
+<td>automatic deploy on push to <code>main</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="constraints">Constraints</h3>
+<ul>
+<li>Render’s free tier shuts down services that have been inactive for
+15 minutes. This is fine for academic evaluation but would not meet the
+uptime requirements of a real production system.</li>
+<li>Uploaded files are stored in temporary memory on Render. A
+production version of this system would need a dedicated file storage
+service like S3 to persist uploads reliably.</li>
+<li>Model training runs synchronously, so multiple users submitting
+large training jobs at the same time could cause timeouts on the free
+tier.</li>
+<li>Sensitive values like <code>SECRET_KEY</code> and
+<code>DATABASE_URL</code> are stored in Render’s environment variable
+panel and are never written into the codebase.</li>
+</ul>
+<hr />
+<h2 id="operational-readiness">Operational Readiness</h2>
+<p>Before sharing the URLs, the following checks were completed to
+confirm the system was ready:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Check</th>
+<th>Method</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend root endpoint responds</td>
+<td><code>GET /</code> returns welcome message JSON</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>API documentation accessible</td>
+<td><code>GET /docs</code> renders Swagger UI with all 8 route
+groups</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Database schema initialized</td>
+<td>All 5 tables present: <code>users</code>, <code>datasets</code>,
+<code>models</code>, <code>reports</code>,
+<code>pipeline_steps</code></td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Seed users created</td>
+<td>4 accounts seeded on first startup by <code>main.py</code></td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Authentication flow functional</td>
+<td><code>POST /api/auth/login</code> returns JWT bearer token</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Frontend loads</td>
+<td>Vercel URL renders React application with navigation</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Frontend to backend connectivity</td>
+<td>Login API call succeeds from the Vercel domain</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Role based access</td>
+<td>Admin, clinician, and analyst each see the correct navigation
+options</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Full pipeline end to end</td>
+<td>Upload, explore, clean, train, and report all complete without
+errors</td>
+<td>Verified</td>
+</tr>
+<tr>
+<td>Multiple user access</td>
+<td>Three simultaneous browser sessions confirmed working at the same
+time</td>
+<td>Verified</td>
+</tr>
+</tbody>
+</table>
+<p>End to end tests from the <code>/frontend/tests/</code> folder and
+the pytest suite in <code>/backend/tests/</code> were both run before
+deployment using <code>pytest --cov</code>. All tests passed before the
+code was pushed to production.</p>
+<hr />
+<h2 id="data-conversion">Data Conversion</h2>
+<p>The database schema was set up by running
+<code>init_schema.sql</code> against the Render managed PostgreSQL
+instance. The script drops and recreates five tables:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>users</code></td>
+<td>Stores login credentials, user roles, active status, and superuser
+flags</td>
+</tr>
+<tr>
+<td><code>datasets</code></td>
+<td>Tracks uploaded dataset names and file paths, linked to the user who
+uploaded them</td>
+</tr>
+<tr>
+<td><code>models</code></td>
+<td>Stores trained model metadata and parameters for each user</td>
+</tr>
+<tr>
+<td><code>reports</code></td>
+<td>Holds generated report data linked to the user who requested it</td>
+</tr>
+<tr>
+<td><code>pipeline_steps</code></td>
+<td>Records each step in a workflow run, including its order and
+parameters</td>
+</tr>
+</tbody>
+</table>
+<h3 id="seeded-default-users">Seeded Default Users</h3>
+<table>
+<thead>
+<tr>
+<th>Username</th>
+<th>Email</th>
+<th>Role</th>
+<th>Superuser</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>admin</td>
+<td>admin@telehealth.com</td>
+<td>administrator</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>clinician</td>
+<td>clinician@telehealth.com</td>
+<td>clinician</td>
+<td>No</td>
+</tr>
+<tr>
+<td>analyst</td>
+<td>analyst@telehealth.com</td>
+<td>data_analyst</td>
+<td>No</td>
+</tr>
+<tr>
+<td>testuser</td>
+<td>test@example.com</td>
+<td>clinician</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>No data from a previous system needed to be migrated. The
+hypertension CSV datasets that were used during local development were
+uploaded again through the live Data Ingestion interface after
+deployment. This confirmed that the upload endpoint stores file metadata
+correctly and that the dataset becomes available for the rest of the
+pipeline. Row counts, column types, and stored parameter values were all
+checked and matched what was expected.</p>
+<hr />
+<h2 id="phased-rollout">Phased Rollout</h2>
+<h3 id="phase-1-infrastructure-provisioning-day-1">Phase 1 —
+Infrastructure Provisioning (Day 1)</h3>
+<ul>
+<li>Render managed PostgreSQL instance created and connection string
+saved to <code>DATABASE_URL</code>.</li>
+<li><code>render.yaml</code> applied: Python web service deployed in
+Oregon region on the free plan.</li>
+<li><code>SECRET_KEY</code> automatically generated and injected by
+Render.</li>
+<li>Backend started up and created all tables, then seeded the default
+users on first boot.</li>
+<li>Confirmed that
+<code>GET https://telehealth-hypertension-analytics.onrender.com/</code>
+returns HTTP 200.</li>
+</ul>
+<h3 id="phase-2-backend-api-verification-day-1-and-2">Phase 2 — Backend
+API Verification (Day 1 and 2)</h3>
+<p>The Swagger UI at <code>/docs</code> was used to confirm that all 8
+API route groups were available and responding correctly:</p>
+<table>
+<thead>
+<tr>
+<th>Route Group</th>
+<th>Prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td><code>/api/auth</code></td>
+</tr>
+<tr>
+<td>Data Ingestion</td>
+<td><code>/api/data-ingestion</code></td>
+</tr>
+<tr>
+<td>Data Exploration</td>
+<td><code>/api/exploration</code></td>
+</tr>
+<tr>
+<td>Data Cleaning</td>
+<td><code>/api/cleaning</code></td>
+</tr>
+<tr>
+<td>ML Modeling</td>
+<td><code>/api/modeling</code></td>
+</tr>
+<tr>
+<td>Visualization</td>
+<td><code>/api/visualization</code></td>
+</tr>
+<tr>
+<td>Reporting</td>
+<td><code>/api/reporting</code></td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td><code>/api/pipeline</code></td>
+</tr>
+</tbody>
+</table>
+<p>A JWT token was obtained through <code>POST /api/auth/login</code>
+and used to test protected endpoints directly in the Swagger UI.</p>
+<h3 id="phase-3-frontend-deployment-day-2">Phase 3 — Frontend Deployment
+(Day 2)</h3>
+<ul>
+<li>Repository connected to Vercel with build command
+<code>npm run build</code> and publish directory set to
+<code>dist</code>.</li>
+<li><code>VITE_API_URL</code> set to
+<code>https://telehealth-hypertension-analytics.onrender.com</code> in
+the Vercel environment settings.</li>
+<li>Vercel deployed successfully and the frontend URL went live.</li>
+<li>Login was tested from the Vercel domain to confirm that API requests
+were reaching the Render backend without any CORS issues.</li>
+</ul>
+<h3 id="phase-4-feature-verification-day-3">Phase 4 — Feature
+Verification (Day 3)</h3>
+<p>Every feature in the application was tested in the live environment.
+Full details are in the Test Plan section below.</p>
+<h3
+id="phase-5-multiple-user-and-report-demonstration-day-3-and-4">Phase 5
+— Multiple User and Report Demonstration (Day 3 and 4)</h3>
+<ul>
+<li>Three browser sessions were opened at the same time: laptop Chrome,
+mobile Safari, and a laptop incognito window.</li>
+<li>Each session logged in under a different role: admin, clinician, and
+analyst.</li>
+<li>All three sessions ran simultaneously without affecting each other,
+confirming that the stateless JWT based authentication keeps sessions
+fully isolated.</li>
+</ul>
+<h3 id="phase-6-stakeholder-release-day-4">Phase 6 — Stakeholder Release
+(Day 4)</h3>
+<ul>
+<li>Final URLs submitted for evaluation.</li>
+<li>Render service health and Vercel deployment logs both checked and
+confirmed clean.</li>
+</ul>
+<hr />
+<h2 id="test-plan">Test Plan</h2>
+<h3 id="authentication-tests">Authentication Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUTH-01</td>
+<td>Valid admin login</td>
+<td><code>POST /api/auth/login</code> with <code>admin</code> and
+correct password</td>
+<td>Returns <code>access_token</code> (JWT) and
+<code>token_type: bearer</code></td>
+</tr>
+<tr>
+<td>AUTH-02</td>
+<td>Valid clinician login</td>
+<td><code>POST /api/auth/login</code> with <code>clinician</code>
+credentials</td>
+<td>Returns JWT token</td>
+</tr>
+<tr>
+<td>AUTH-03</td>
+<td>Invalid credentials</td>
+<td><code>POST /api/auth/login</code> with wrong password</td>
+<td>Returns HTTP 401 Unauthorized</td>
+</tr>
+<tr>
+<td>AUTH-04</td>
+<td>No token on protected endpoint</td>
+<td><code>GET /api/auth/users/me</code> with no Authorization
+header</td>
+<td>Returns HTTP 401</td>
+</tr>
+<tr>
+<td>AUTH-05</td>
+<td>Valid token on protected endpoint</td>
+<td><code>GET /api/auth/users/me</code> with
+<code>Bearer &lt;token&gt;</code></td>
+<td>Returns user profile JSON</td>
+</tr>
+<tr>
+<td>AUTH-06</td>
+<td>Role enforcement</td>
+<td>Log in as analyst and attempt an admin only action</td>
+<td>Returns HTTP 403 Forbidden</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="data-ingestion-tests">Data Ingestion Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ING-01</td>
+<td>Upload CSV file</td>
+<td><code>POST /api/data-ingestion/upload</code> with valid
+<code>.csv</code></td>
+<td>Returns <code>dataset_id</code> and success message</td>
+</tr>
+<tr>
+<td>ING-02</td>
+<td>Upload Excel file</td>
+<td>POST with <code>.xlsx</code> file</td>
+<td>Dataset created and metadata stored</td>
+</tr>
+<tr>
+<td>ING-03</td>
+<td>Upload JSON file</td>
+<td>POST with <code>.json</code> file</td>
+<td>Dataset created successfully</td>
+</tr>
+<tr>
+<td>ING-04</td>
+<td>Upload unsupported format</td>
+<td>POST with <code>.txt</code> file</td>
+<td>Returns HTTP 400 with error message</td>
+</tr>
+<tr>
+<td>ING-05</td>
+<td>Import from URL</td>
+<td><code>POST /api/data-ingestion/url</code> with valid CSV URL</td>
+<td>Dataset fetched and created</td>
+</tr>
+<tr>
+<td>ING-06</td>
+<td>Verify dataset persisted</td>
+<td>After upload, check <code>datasets</code> table</td>
+<td>Record present with correct <code>user_id</code> and
+<code>file_path</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="data-exploration-tests">Data Exploration Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXP-01</td>
+<td>Summary statistics</td>
+<td><code>POST /api/exploration/statistics</code> with
+<code>dataset_id</code></td>
+<td>Returns mean, median, std dev, min, and max per column</td>
+</tr>
+<tr>
+<td>EXP-02</td>
+<td>Visualization data</td>
+<td><code>GET /api/exploration/visualization-data?dataset_id=X</code></td>
+<td>Returns chart ready JSON</td>
+</tr>
+<tr>
+<td>EXP-03</td>
+<td>Correlation matrix</td>
+<td>Request correlation from the exploration endpoint</td>
+<td>Returns correlation coefficients between numerical columns</td>
+</tr>
+<tr>
+<td>EXP-04</td>
+<td>Invalid dataset ID</td>
+<td>Request stats with a non-existent <code>dataset_id</code></td>
+<td>Returns HTTP 404</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="data-cleaning-tests">Data Cleaning Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLN-01</td>
+<td>Mean imputation</td>
+<td><code>POST /api/cleaning/clean</code> with
+<code>imputation_method: "mean"</code></td>
+<td>Missing values replaced with column mean</td>
+</tr>
+<tr>
+<td>CLN-02</td>
+<td>Median imputation</td>
+<td><code>imputation_method: "median"</code></td>
+<td>Missing values replaced with median</td>
+</tr>
+<tr>
+<td>CLN-03</td>
+<td>Outlier detection</td>
+<td><code>outlier_detection: true</code></td>
+<td>Outlier rows flagged or removed</td>
+</tr>
+<tr>
+<td>CLN-04</td>
+<td>Min max scaling</td>
+<td><code>scaling_method: "minmax"</code></td>
+<td>Values normalized to [0, 1] range</td>
+</tr>
+<tr>
+<td>CLN-05</td>
+<td>Standard scaling</td>
+<td><code>scaling_method: "standard"</code></td>
+<td>Values z-score normalized</td>
+</tr>
+<tr>
+<td>CLN-06</td>
+<td>One hot encoding</td>
+<td><code>encoding_method: "onehot"</code></td>
+<td>Categorical columns expanded to binary columns</td>
+</tr>
+<tr>
+<td>CLN-07</td>
+<td>Combined operations</td>
+<td>All four options enabled at once</td>
+<td>All transformations applied in the correct order</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="modeling-tests">Modeling Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MDL-01</td>
+<td>Train logistic regression</td>
+<td><code>POST /api/modeling/train</code> with
+<code>model_type: "logistic_regression"</code></td>
+<td>Returns <code>model_id</code>, accuracy, precision, recall, and F1
+score</td>
+</tr>
+<tr>
+<td>MDL-02</td>
+<td>Train random forest</td>
+<td><code>model_type: "random_forest"</code></td>
+<td>Returns metrics and a feature importance dictionary</td>
+</tr>
+<tr>
+<td>MDL-03</td>
+<td>Train XGBoost</td>
+<td><code>model_type: "xgboost"</code></td>
+<td>Model trained and feature importance returned</td>
+</tr>
+<tr>
+<td>MDL-04</td>
+<td>Hyperparameter tuning</td>
+<td><code>POST /api/modeling/tune</code> with a parameter grid</td>
+<td>Returns the best parameters and cross validated score</td>
+</tr>
+<tr>
+<td>MDL-05</td>
+<td>Model evaluation</td>
+<td><code>POST /api/modeling/evaluate</code> with <code>model_id</code>
+and test data</td>
+<td>Returns confusion matrix and ROC-AUC score</td>
+</tr>
+<tr>
+<td>MDL-06</td>
+<td>Model explainability</td>
+<td><code>POST /api/modeling/explain</code></td>
+<td>Returns feature importance scores</td>
+</tr>
+<tr>
+<td>MDL-07</td>
+<td>Missing target column</td>
+<td>Train with an invalid <code>target</code> field name</td>
+<td>Returns HTTP 400 with a descriptive error</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="visualization-tests">Visualization Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VIZ-01</td>
+<td>Chart data</td>
+<td><code>GET /api/visualization/visualizations/charts?dataset_id=X</code></td>
+<td>Returns Plotly and Chart.js compatible JSON</td>
+</tr>
+<tr>
+<td>VIZ-02</td>
+<td>Dashboard data</td>
+<td><code>GET /api/visualization/visualizations/dashboard?dataset_id=X</code></td>
+<td>Returns aggregated metrics for the dashboard</td>
+</tr>
+<tr>
+<td>VIZ-03</td>
+<td>Risk gauge</td>
+<td><code>GET /api/visualization/visualizations/risk-gauge?dataset_id=X</code></td>
+<td>Returns a risk score for the gauge chart</td>
+</tr>
+<tr>
+<td>VIZ-04</td>
+<td>Frontend chart rendering</td>
+<td>Open the Visualization tab in a browser</td>
+<td>Charts render without any console errors</td>
+</tr>
+<tr>
+<td>VIZ-05</td>
+<td>Dashboard interactivity</td>
+<td>Change the selected dataset in the dashboard UI</td>
+<td>Charts update to reflect the new selection</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="reporting-tests">Reporting Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RPT-01</td>
+<td>Generate PDF report</td>
+<td><code>POST /api/reporting/reports/pdf</code> with JSON data</td>
+<td>Returns a downloadable PDF file</td>
+</tr>
+<tr>
+<td>RPT-02</td>
+<td>Export CSV</td>
+<td><code>POST /api/reporting/reports/csv</code></td>
+<td>Returns a downloadable <code>.csv</code> file</td>
+</tr>
+<tr>
+<td>RPT-03</td>
+<td>Report placeholder visible</td>
+<td>Navigate to the Reporting section in the UI</td>
+<td>Report generation form visible on the page</td>
+</tr>
+<tr>
+<td>RPT-04</td>
+<td>Report stored in DB</td>
+<td>After generation, check the <code>reports</code> table</td>
+<td>Record present with <code>user_id</code> and
+<code>report_data</code></td>
+</tr>
+<tr>
+<td>RPT-05</td>
+<td>Empty data submission</td>
+<td>Submit an empty JSON body</td>
+<td>Returns HTTP 422 Unprocessable Entity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="pipeline-tests">Pipeline Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PIP-01</td>
+<td>Start pipeline</td>
+<td><code>POST /api/pipeline/pipeline/start</code> with step
+definitions</td>
+<td>Returns a pipeline started confirmation</td>
+</tr>
+<tr>
+<td>PIP-02</td>
+<td>Check status</td>
+<td><code>GET /api/pipeline/pipeline/status</code></td>
+<td>Returns the current step name and progress</td>
+</tr>
+<tr>
+<td>PIP-03</td>
+<td>Execute single step</td>
+<td><code>POST /api/pipeline/pipeline/execute</code> with one step</td>
+<td>Step runs and returns a result</td>
+</tr>
+<tr>
+<td>PIP-04</td>
+<td>Stop pipeline</td>
+<td><code>POST /api/pipeline/pipeline/stop</code></td>
+<td>Pipeline stops and status reflects the change</td>
+</tr>
+<tr>
+<td>PIP-05</td>
+<td>Full end to end pipeline</td>
+<td>Ingest, explore, clean, model, visualize, and report in
+sequence</td>
+<td>All steps finish and the <code>pipeline_steps</code> table records
+each one</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="multiple-user-concurrent-access-tests">Multiple User Concurrent
+Access Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MU-01</td>
+<td>Simultaneous login</td>
+<td>Open desktop Chrome, a mobile browser, and an incognito tab; log in
+with admin, clinician, and analyst</td>
+<td>All three sessions authenticate at the same time</td>
+</tr>
+<tr>
+<td>MU-02</td>
+<td>Concurrent data upload</td>
+<td>Two users upload different CSV files at the same time</td>
+<td>Both uploads succeed and each dataset is tied to the correct
+user</td>
+</tr>
+<tr>
+<td>MU-03</td>
+<td>Concurrent model training</td>
+<td>Two analyst sessions submit training jobs at the same time</td>
+<td>Both return correct results with no overlap between models</td>
+</tr>
+<tr>
+<td>MU-04</td>
+<td>Session isolation</td>
+<td>Admin makes a change; check that the clinician session is
+unaffected</td>
+<td>Each session remains fully independent</td>
+</tr>
+<tr>
+<td>MU-05</td>
+<td>Concurrent report generation</td>
+<td>Two users generate PDF reports at the same time</td>
+<td>Both receive the correct report for their own data</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="security-tests">Security Tests</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Case</th>
+<th>Steps</th>
+<th>Expected Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEC-01</td>
+<td>Expired token rejection</td>
+<td>Use a JWT token after its expiration window</td>
+<td>Returns HTTP 401</td>
+</tr>
+<tr>
+<td>SEC-02</td>
+<td>Tampered token</td>
+<td>Modify the JWT payload and resubmit</td>
+<td>Returns HTTP 401 because the signature no longer matches</td>
+</tr>
+<tr>
+<td>SEC-03</td>
+<td>SQL injection in login</td>
+<td>Submit <code>' OR 1=1; --</code> as the username</td>
+<td>SQLAlchemy parameterized queries block the injection and return
+401</td>
+</tr>
+<tr>
+<td>SEC-04</td>
+<td>Password storage</td>
+<td>Check the <code>hashed_password</code> column in the
+<code>users</code> table</td>
+<td>Passwords are stored as bcrypt hashes, never in plain text</td>
+</tr>
+<tr>
+<td>SEC-05</td>
+<td>HTTPS enforced</td>
+<td>Try accessing both URLs over plain HTTP</td>
+<td>Render and Vercel redirect all traffic to HTTPS automatically</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="support">Support</h2>
+<h3 id="user-credentials-for-testing">User Credentials for Testing</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Username</th>
+<th>Email</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Administrator</td>
+<td>admin</td>
+<td>admin@telehealth.com</td>
+</tr>
+<tr>
+<td>Clinician</td>
+<td>clinician</td>
+<td>clinician@telehealth.com</td>
+</tr>
+<tr>
+<td>Data Analyst</td>
+<td>analyst</td>
+<td>analyst@telehealth.com</td>
+</tr>
+<tr>
+<td>Test User</td>
+<td>testuser</td>
+<td>test@example.com</td>
+</tr>
+</tbody>
+</table>
+<h3 id="self-service-documentation">Self-Service Documentation</h3>
+<p>The Swagger UI at
+https://telehealth-hypertension-analytics.onrender.com/docs covers every
+API endpoint with request and response examples that can be tested
+directly in the browser. No additional setup is needed to use it.</p>
+<h3 id="user-training-workflow-guide">User Training Workflow Guide</h3>
+<ol type="1">
+<li>Navigate to
+https://telehealth-hypertension-analytics-vercel-p45feeg88.vercel.app/</li>
+<li>Log in with your assigned credentials.</li>
+<li>Upload a hypertension CSV dataset using the <strong>Data
+Ingestion</strong> tab.</li>
+<li>Review summary statistics and correlations in the <strong>Data
+Exploration</strong> tab.</li>
+<li>Handle missing values, outliers, and scaling in the <strong>Data
+Cleaning</strong> tab.</li>
+<li>Choose a model type, train it, and review the accuracy metrics in
+the <strong>Modeling</strong> tab.</li>
+<li>Explore the risk gauge, charts, and dashboard in the
+<strong>Visualization</strong> tab.</li>
+<li>Generate and download a PDF or CSV report from the
+<strong>Reporting</strong> tab.</li>
+</ol>
+<h3 id="administrator-tasks">Administrator Tasks</h3>
+<p>Users with administrator access and the <code>is_superuser</code>
+flag set to true can create new accounts, disable existing ones, and
+review pipeline logs through the <strong>User Management</strong>
+section. This area is only visible to administrator accounts.</p>
+<hr />
+<h2 id="release-planning">Release Planning</h2>
+<h3 id="production-release-artifacts">Production Release Artifacts</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Live Frontend</td>
+<td>https://telehealth-hypertension-analytics-vercel-p45feeg88.vercel.app/</td>
+</tr>
+<tr>
+<td>Live Backend API</td>
+<td>https://telehealth-hypertension-analytics.onrender.com/</td>
+</tr>
+<tr>
+<td>Interactive API Docs</td>
+<td>https://telehealth-hypertension-analytics.onrender.com/docs</td>
+</tr>
+</tbody>
+</table>
+<p>Both platforms are connected to the GitHub repository and will
+redeploy automatically whenever new code is pushed to
+<code>main</code>.</p>
+<h3 id="evidence-of-deployment">Evidence of Deployment</h3>
+<ul>
+<li>The Vercel deployment dashboard shows a successful build with full
+<code>vite build</code> output and a deployment timestamp.</li>
+<li>The Render dashboard shows the web service as <strong>Live</strong>
+and the PostgreSQL instance as <strong>Available</strong>, with logs
+confirming that the application started up cleanly.</li>
+<li>Screenshots document three simultaneous browser sessions running
+under different roles.</li>
+<li>Screenshots show a PDF report being requested, produced, and
+downloaded from the live site.</li>
+</ul>
+<h3 id="contingency-plans">Contingency Plans</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Contingency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Render free tier cold start delays evaluation</td>
+<td>Open the <code>/docs</code> page about 60 seconds before testing to
+wake the service up first</td>
+</tr>
+<tr>
+<td>Render service crashes during evaluation</td>
+<td>Use the one click redeploy option in the Render dashboard to restore
+the last working build</td>
+</tr>
+<tr>
+<td>Vercel frontend build fails on a new push</td>
+<td>Roll back to the previous deployment using Vercel’s instant rollback
+feature</td>
+</tr>
+<tr>
+<td>Database data is lost</td>
+<td>Rerun <code>init_schema.sql</code> and
+<code>sample_users.sql</code>; the application will reseed users on the
+next startup</td>
+</tr>
+<tr>
+<td>CORS errors appear from a new domain</td>
+<td>Add the domain to the allowed origins list in the FastAPI middleware
+and redeploy</td>
+</tr>
+<tr>
+<td>ML training times out on the free tier</td>
+<td>Use a smaller dataset or a narrower parameter grid; upgrading to
+Render Starter at $7 per month removes this limitation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="post-release-monitoring">Post-Release Monitoring</h3>
+<ul>
+<li>Render streams request and error logs in real time from the service
+dashboard.</li>
+<li>Vercel provides deployment logs and edge network traffic data.</li>
+<li>Any unhandled errors in the backend are captured by the logging
+setup in <code>backend/app/core/logging.py</code> and appear immediately
+in the Render log stream.</li>
+</ul>
+</body>
+</html>

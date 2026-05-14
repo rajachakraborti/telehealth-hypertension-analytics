@@ -30,6 +30,9 @@ const FileUpload = () => {
             const response = await uploadFile(file);
             setSuccess('File uploaded successfully!');
             setUploadResult(response);
+            if (response.dataset_id) {
+                localStorage.setItem('dataset_id', response.dataset_id);
+            }
             setFile(null);
             // Reset file input
             event.target.reset();
