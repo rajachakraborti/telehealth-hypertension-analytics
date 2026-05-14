@@ -30,7 +30,12 @@ async def upload_file(file: UploadFile = File(...)):
         validation_errors = validate_data(data)
         if validation_errors:
             raise HTTPException(status_code=400, detail=validation_errors[0])
-        return {"message": "File uploaded successfully", "filename": file.filename}
+        return {
+            "message": "File uploaded successfully",
+            "filename": data["filename"],
+            "rows": data["rows"],
+            "columns": data["columns"],
+        }
     except HTTPException:
         raise
     except Exception as e:

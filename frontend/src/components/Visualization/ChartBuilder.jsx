@@ -1,7 +1,31 @@
 import React, { useState } from 'react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 
-const ChartBuilder = ({ data }) => {
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+);
+
+const ChartBuilder = ({ data = [] }) => {
     const [chartType, setChartType] = useState('bar');
     const [selectedData, setSelectedData] = useState(null);
 
@@ -30,17 +54,23 @@ const ChartBuilder = ({ data }) => {
     return (
         <div>
             <h2>Chart Builder</h2>
-            <select onChange={handleChartTypeChange}>
-                <option value="bar">Bar Chart</option>
-                <option value="line">Line Chart</option>
-                <option value="pie">Pie Chart</option>
-            </select>
-            <select onChange={handleDataSelection}>
-                {data.map((item, index) => (
-                    <option key={index} value={item.label}>{item.label}</option>
-                ))}
-            </select>
-            <Chart type={chartType} data={chartData} />
+            {data.length === 0 ? (
+                <p style={{ color: '#999' }}>No data available. Upload a file first to build charts.</p>
+            ) : (
+                <>
+                    <select onChange={handleChartTypeChange}>
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="pie">Pie Chart</option>
+                    </select>
+                    <select onChange={handleDataSelection}>
+                        {data.map((item, index) => (
+                            <option key={index} value={item.label}>{item.label}</option>
+                        ))}
+                    </select>
+                    <Chart type={chartType} data={chartData} />
+                </>
+            )}
         </div>
     );
 };
