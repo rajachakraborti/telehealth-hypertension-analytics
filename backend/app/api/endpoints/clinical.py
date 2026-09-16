@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import date
@@ -8,6 +8,7 @@ import random
 from app.db.database import get_db
 from app.models.clinical import Patient
 from app.api.dependencies import RoleChecker
+from app.core.rate_limiter import limiter
 
 router = APIRouter()
 
@@ -19,7 +20,9 @@ class PatientCreate(BaseModel):
     date_of_birth: date
 
 @router.post("/patients", summary="Register Patient (Tests PGP Encryption Overhead)")
+@limiter.limit("20/minute")
 async def create_patient(
+    request: Request,
     patient: PatientCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(RoleChecker(["clinician", "administrator"]))

@@ -33,7 +33,15 @@ def _init_db():
 
 _init_db()
 
+from app.core.rate_limiter import limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
 app = FastAPI(title="Telehealth Hypertension Predictive Analytics System")
+
+# Attach Rate Limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
 app.add_middleware(
