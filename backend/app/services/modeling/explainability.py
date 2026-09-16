@@ -45,9 +45,13 @@ class DualLayerExplainer:
         df_input = pd.DataFrame([patient_data])
         features = ["systolic", "diastolic", "map", "pulse_pressure", "is_night", "is_dipper"]
         
-        # Predict
+        # Predict and extract confidence probability
         pred_class_idx = int(self.model.predict(df_input[features])[0])
         pred_stage = self.label_mapping[pred_class_idx]
+        
+        # Get the probability array and extract the confidence score for the predicted class
+        probabilities = self.model.predict_proba(df_input[features])[0]
+        confidence_score = float(probabilities[pred_class_idx])
         
         # Calculate SHAP Values
         shap_values = self.explainer.shap_values(df_input[features])
@@ -73,7 +77,7 @@ class DualLayerExplainer:
         
         # Generate Plain-English Translation (Layer 2)
         narrative = (
-            f"Patient Risk Rating: {pred_stage}. "
+            f"Patient Risk Rating: {pred_stage} (Model Confidence: {confidence_score:.1%}). "
             f"Primary driver: {top_driver_1[0].replace('_', ' ').title()} "
             f"({'+' if top_driver_1[1] > 0 else ''}{round(top_driver_1[1], 3)} impact on risk score), "
             f"followed by {top_driver_2[0].replace('_', ' ').title()} "
@@ -85,6 +89,7 @@ class DualLayerExplainer:
 
         return {
             "prediction": pred_stage,
+            "confidence_score": round(confidence_score, 4),
             "shap_attributions": feature_impacts,
             "clinical_summary": narrative
         }
