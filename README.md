@@ -1,93 +1,45 @@
 # Telehealth Hypertension Predictive Analytics System
 
-## Overview
+This repository contains the backend API and machine learning pipeline for a telehealth system designed to monitor and predict hypertensive crises using synthetic Ambulatory Blood Pressure Monitoring (ABPM) telemetry.
 
-The Telehealth Hypertension Predictive Analytics System is a web-based application designed to assist healthcare professionals in managing chronic hypertension among adults through predictive analytics. This system enables users to ingest, explore, clean, analyze, and visualize healthcare data effectively.
+## Architecture & Features
+* **Machine Learning Pipeline**: Custom XGBoost Classifier (AHA Hypertension Staging) and Isolation Forest (Anomaly Detection).
+* **Explainable AI (XAI)**: Dual-layer SHAP TreeExplainer generating both mathematical feature attributions and plain-English clinical summaries.
+* **HIPAA Compliance**: 
+  * Role-Based Access Control (RBAC) via OAuth2 JWT.
+  * Column-level encryption (`pgp_sym_encrypt`) on PostgreSQL for Protected Health Information (PHI).
+* **Data Synthesis**: Automated data generator producing time-series telemetry strictly adhering to clinical bounds (MAP 70-110, Dipping 10-20%).
 
-## Project Structure
+## Getting Started
 
-The project is organized into two main components: the frontend and the backend.
+### 1. Installation
+Install the project dependencies inside a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r backend/requirements.txt
+pip install shap locust pytest
+```
 
-### Frontend
+### 2. Running the Server
+Launch the FastAPI server:
+```bash
+cd backend
+python -m uvicorn app.main:app --port 8000
+```
+Navigate to `http://localhost:8000/docs` to view the interactive Swagger API documentation.
 
-The frontend is built using React and provides a user-friendly interface for interacting with the system. Key components include:
+### 3. Load Testing (Locust)
+To evaluate the p95 latency overhead of the database encryption and JWT security layers:
+```bash
+cd backend
+locust -f scripts/locustfile.py
+```
+Navigate to `http://localhost:8089` to start the simulated concurrent users.
 
-- **Data Ingestion**: Components for uploading files and importing data from URLs.
-- **Data Exploration**: Tools for displaying summary statistics, data tables, and correlation matrices.
-- **Data Cleaning**: Options for handling missing data and outliers.
-- **Modeling**: Interfaces for selecting models and tuning hyperparameters.
-- **Visualization**: Components for creating charts and dashboards.
-- **Reporting**: Tools for generating and exporting reports.
-- **Pipeline Management**: Visualizers and controls for managing the analytic workflow.
-- **User Management**: Interfaces for user login and role management.
-
-### Backend
-
-The backend is built using Python and FastAPI, providing API endpoints for all functionalities. Key components include:
-
-- **API Endpoints**: For data ingestion, exploration, cleaning, modeling, visualization, reporting, and user authentication.
-- **Services**: Functions for handling data processing, model training, and report generation.
-- **Database**: A PostgreSQL database for storing user data and processed datasets.
-
-## Installation
-
-To set up the project locally, follow these steps:
-
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd telehealth-hypertension-analytics
-   ```
-
-2. Set up the backend:
-   - Navigate to the `backend` directory.
-   - Install dependencies:
-     ```
-     pip install -r requirements.txt
-     ```
-   - Run the backend server:
-     ```
-     uvicorn app.main:app --reload
-     ```
-
-3. Set up the frontend:
-   - Navigate to the `frontend` directory.
-   - Install dependencies:
-     ```
-     npm install
-     ```
-   - Run the frontend application:
-     ```
-     npm run dev
-     ```
-
-## Usage
-
-Once both the frontend and backend are running, access the application through your web browser at `http://localhost:3000`. Users can upload data files, explore datasets, apply data cleaning methods, build models, visualize results, and generate reports.
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
-## Acknowledgments
-
-- Special thanks to the contributors and the community for their support in developing this project.
-
-# Sample login
- Run the Python seed script
-  cd backend
-  source venv/bin/activate
-  python scripts/seed_users.py
-
- Login Credentials
-
-  | Username  | Password   |
-  |-----------|------------|
-  | admin     | admin123   |
-  | testuser  | test123    |
-  | clinician | clinic123  |
-  | analyst   | analyst123 |
+### 4. Unit Testing
+Run the test suite using pytest to verify statistical boundaries and API security:
+```bash
+cd backend
+pytest tests/
+```

@@ -1,95 +1,55 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List, Dict, Optional
-from app.services.modeling.model_trainer import train_model_on_dataset
-from app.services.modeling.hyperparameter_tuner import tune_model_on_dataset
-from app.services.modeling.model_evaluator import evaluate_model
-from app.services.modeling.explainability import explain_model
+from typing import Dict, Any
+import os
+
+from app.api.dependencies import RoleChecker
+from app.services.modeling.model_trainer import TelehealthModelTrainer
+from app.services.modeling.explainability import DualLayerExplainer
 
 router = APIRouter()
 
-AVAILABLE_MODELS = [
-    {"id": "random_forest",       "name": "Random Forest"},
-    {"id": "gradient_boosting",   "name": "Gradient Boosting"},
-    {"id": "logistic_regression", "name": "Logistic Regression"},
-    {"id": "xgboost",             "name": "XGBoost"},
-]
+# Data path created in Phase 1
+DATA_PATH = os.path.join(os.path.dirname(__file__), "../../../sample_telemetry.csv")
 
+class PatientTelemetry(BaseModel):
+    systolic: float
+    diastolic: float
+    map: float
+    pulse_pressure: float
+    is_night: int
+    is_dipper: int
 
-class ModelRequest(BaseModel):
-    model_config = {'protected_namespaces': ()}
-    dataset_id: str
-    model_type: str
-    target: str
-    features: Optional[List[str]] = None
-    hyperparameters: Optional[Dict[str, float]] = None
-
-
-class TuningRequest(BaseModel):
-    model_config = {'protected_namespaces': ()}
-    dataset_id: str
-    model_type: str
-    target: str
-    features: Optional[List[str]] = None
-    param_grid: Dict[str, List]
-
-
-class ModelResponse(BaseModel):
-    model_config = {'protected_namespaces': ()}
-    model_id: str
-    metrics: Dict[str, float]
-    feature_importance: Dict[str, float]
-
-
-@router.get("/models")
-async def get_available_models():
-    return {"models": AVAILABLE_MODELS}
-
-
-@router.post("/train", response_model=ModelResponse)
-async def train_model_endpoint(request: ModelRequest):
+@router.post("/train", summary="Train XGBoost & Isolation Forest")
+async def train_models(
+    current_user: dict = Depends(RoleChecker(["administrator"]))
+):
+    """
+    Executes the training pipeline using the synthetic ABPM telemetry data.
+    Only administrators can retrain models.
+    """
     try:
-        model_id, metrics, feature_importance = train_model_on_dataset(
-            dataset_id=request.dataset_id,
-            model_type=request.model_type,
-            target=request.target,
-            features=request.features,
-            hyperparameters=request.hyperparameters or {},
-        )
-        return ModelResponse(model_id=model_id, metrics=metrics, feature_importance=feature_importance)
+        trainer = TelehealthModelTrainer(DATA_PATH)
+        results = trainer.execute_pipeline()
+        return results
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/tune")
-async def tune_model_endpoint(request: TuningRequest):
+@router.post("/explain", summary="Generate Dual-Layer SHAP Explanation")
+async def explain_prediction(
+    telemetry: PatientTelemetry,
+    current_user: dict = Depends(RoleChecker(["clinician", "administrator"]))
+):
+    """
+    Simulates a clinician requesting an AI explanation for a single telemetry reading.
+    """
     try:
-        result = tune_model_on_dataset(
-            dataset_id=request.dataset_id,
-            model_type=request.model_type,
-            target=request.target,
-            features=request.features,
-            param_grid=request.param_grid,
-        )
+        explainer = DualLayerExplainer()
+        result = explainer.explain_prediction(telemetry.model_dump())
         return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@router.post("/evaluate", response_model=ModelResponse)
-async def evaluate_model_endpoint(request: ModelRequest):
-    try:
-        model_id, metrics, feature_importance = evaluate_model(
-            model_type=request.model_type,
-            features=request.features,
-            target=request.target
-        )
-        return ModelResponse(model_id=model_id, metrics=metrics, feature_importance=feature_importance)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@router.post("/explain")
-async def explain_model_endpoint(model_id: str):
-    try:
-        explanation = explain_model(model_id=model_id)
-        return explanation
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

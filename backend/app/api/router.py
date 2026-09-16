@@ -1,10 +1,11 @@
 from fastapi import APIRouter
-from .endpoints import data_ingestion, data_exploration, data_cleaning, modeling, visualization, reporting, pipeline, auth
+from .endpoints import data_ingestion, data_exploration, data_cleaning, modeling, visualization, reporting, pipeline, auth, clinical
 
 api_router = APIRouter()
 
 # Include the various endpoints
 api_router.include_router(data_ingestion.router, prefix="/data-ingestion", tags=["Data Ingestion"])
+api_router.include_router(clinical.router, prefix="/clinical", tags=["Clinical (DB Encryption)"])
 api_router.include_router(data_exploration.router, prefix="/exploration", tags=["Data Exploration"])
 api_router.include_router(data_cleaning.router, prefix="/cleaning", tags=["Data Cleaning"])
 api_router.include_router(modeling.router, prefix="/modeling", tags=["Modeling"])

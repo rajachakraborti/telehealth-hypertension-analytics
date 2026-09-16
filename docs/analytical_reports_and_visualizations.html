@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytical Reports and Visualizations</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 860px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.8em; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  h2 { font-size: 1.3em; margin-top: 2em; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  blockquote { background: #f4f4f4; border-left: 4px solid #666; margin: 1em 0; padding: 8px 16px; }
+  img { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; }
+  code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 6px 12px; }
+  th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<h1>Analytical Reports and Visualizations: Telehealth Hypertension Predictive Analytics Platform</h1>
+<h2>Introduction</h2>
+<p>The Telehealth Hypertension Predictive Analytics platform is designed to support clinical decision-making by transforming raw patient data into actionable risk intelligence. The reporting layer of the system was built to surface that intelligence through three coordinated mechanisms: a live analytical dashboard, an interactive chart builder, and a structured export pipeline. Each mechanism maps directly to a functional need identified in the original project specifications, specifically the need for clinicians and data analysts to monitor population-level risk, explore individual variable distributions, and share findings beyond the application boundary. The following sections detail how each reporting component operates, what it produces, and why the design choices made serve the project's clinical and analytical goals.</p>
+<h2>Quantitative Data Exploration Reports</h2>
+<p>The platform's data exploration layer is anchored by the <code>SummaryStatistics</code> component, which fetches descriptive statistics from the backend <code>statistics.py</code> service and renders them in a structured tabular format. For each numeric variable in the loaded dataset, including systolic blood pressure, diastolic blood pressure, age, BMI, and other clinical indicators, the report displays mean, median, standard deviation, minimum, maximum, record count, and missing value totals.</p>
+<blockquote>
+<p><strong>[ SummaryStatistics component displaying the statistics table with clinical variable rows]</strong>
+<img alt="alt text" src="image.png" />
+These statistics were chosen deliberately. Mean and median together reveal the degree of skew in a distribution, which is clinically meaningful for hypertension data where extreme readings can pull the mean away from the typical patient. Standard deviation quantifies dispersion, indicating whether a patient cohort is tightly clustered around a blood pressure norm or heterogeneous. The missing value count surfaces data quality issues before they propagate into model training. This combination follows the descriptive statistics framework recommended for medical informatics datasets, where both central tendency and data completeness directly affect downstream model reliability (Rhoads &amp; Tanner, 2018).</p>
+</blockquote>
+<p>The backend <code>calculate_summary_statistics</code> function in <code>backend/app/services/data_exploration/statistics.py</code> computes these values using pandas, which ensures the statistics reflect the actual cleaned dataset at query time rather than precomputed snapshots. An additional <code>calculate_missing_data_statistics</code> function provides per-column missing percentage, supporting the data quality review workflow built into the preprocessing step.</p>
+<h2>On-Screen Data Visualization and Exploratory Characteristics</h2>
+<p>The <code>Dashboard</code> component (<code>frontend/src/components/Visualization/Dashboard.jsx</code>) assembles the platform's primary visual interface into a four-panel grid layout. The top panel displays the <code>RiskGauge</code>, a color-coded arc gauge that normalizes a patient's computed risk score to a 0–1 scale across five severity bands: green for low risk, progressing through yellow and orange to red for critical. The gauge needle and arc color change dynamically as risk scores update, making the clinical severity gradient immediately interpretable without requiring the clinician to read a numeric threshold table.</p>
+<blockquote>
+<p><strong>[ Dashboard with Risk Gauge displayed at the top showing a patient risk score]</strong>
+<img alt="alt text" src="image-1.png" />
+The lower panels display the <code>SummaryStatistics</code> table and the <code>DataTable</code> side-by-side, allowing the analyst to compare aggregate statistics against individual patient records simultaneously. The full-width bottom panel renders the <code>CorrelationMatrix</code>, which uses the Ant Design <code>Table</code> component to display pairwise Pearson correlation coefficients computed by <code>calculate_correlation_matrix</code> in the statistics service.</p>
+<p><strong>[Dashboard showing the Correlation Matrix panel]</strong>
+<img alt="alt text" src="image-2.png" />
+The correlation matrix serves a specific exploratory function: identifying multicollinearity among clinical features before model training. High correlation between two predictors, such as between systolic and diastolic blood pressure, signals redundancy that could inflate coefficient variance in regression-based models. By surfacing this information in the exploration phase, the platform enables analysts to make informed feature selection decisions before proceeding to the modeling stage.</p>
+</blockquote>
+<h2>On-Screen Data Analytics</h2>
+<p>The platform's analytical reporting centers on two model-level components: the <code>FeatureImportance</code> visualization and the <code>ModelExplainability</code> service. After a model is trained through the <code>ModelSelection</code> and <code>HyperparameterTuning</code> workflow, the <code>ModelEvaluator</code> (<code>backend/app/services/modeling/model_evaluator.py</code>) computes five standard binary classification metrics, namely accuracy, precision, recall, F1 score, and ROC-AUC, and returns them to the frontend for display.</p>
+<blockquote>
+<p><strong>[ Model evaluation metrics panel showing accuracy, precision, recall, F1, and ROC-AUC values]</strong>
+<img alt="alt text" src="image-5.png" />
+These five metrics were selected because no single metric is sufficient for clinical prediction tasks. Accuracy alone is misleading when class distributions are imbalanced, which is common in hypertension datasets where high-risk patients are the minority. Recall (sensitivity) is particularly important clinically because missing a high-risk patient (a false negative) carries greater harm than an unnecessary follow-up appointment. ROC-AUC provides a threshold-independent view of discriminative power, enabling comparison across models regardless of the operating threshold chosen.</p>
+</blockquote>
+<p>The <code>ModelExplainability</code> service (<code>backend/app/services/modeling/explainability.py</code>) extends the analytics layer with permutation importance, partial dependence plots, and SHAP value summaries. Permutation importance measures how much model performance degrades when each feature is randomly shuffled, producing an importance score that reflects each variable's true predictive contribution. SHAP values go further by attributing each prediction to individual feature contributions, enabling explanation of individual patient risk scores in clinical terms.</p>
+<blockquote>
+<p><strong>[FeatureImportance bar chart showing ranked clinical features by permutation importance score]</strong>
+<img alt="alt text" src="image-4.png" />
+These methods together address the interpretability requirement that is essential in clinical AI systems. A model that predicts high risk without explanation provides limited clinical utility; one that identifies that elevated age combined with high BMI drove a particular risk score gives the clinician actionable context.</p>
+</blockquote>
+<h2>Plots and Graphs</h2>
+<p>The <code>ChartBuilder</code> component (<code>frontend/src/components/Visualization/ChartBuilder.jsx</code>) gives users direct control over chart type and data series. A dropdown selector allows switching between bar, line, and pie chart renderings using the Chart.js <code>Chart</code> component, and a second dropdown selects which dataset variable to plot. This architecture separates chart type from data series, so the same variable can be examined as a distribution bar chart, a temporal line chart, or a composition pie chart without navigating to a different screen.</p>
+<blockquote>
+<p><strong>[ ChartBuilder with a bar chart selected, showing blood pressure distribution across the dataset]</strong>
+<img alt="alt text" src="image-6.png" />
+Bar charts were chosen as the default because they optimally represent frequency distributions and ranked comparisons, which are the two most common analytical operations users perform during data exploration. Line charts are appropriate for tracking patient metrics across time-series telehealth readings. Pie charts support proportion-based analysis, such as the breakdown of patients across risk categories.</p>
+</blockquote>
+<p>To optimize information density, Chart.js axis titles are explicitly labeled with unit names and the legend is positioned at the top to avoid obscuring the plot area. The <code>FeatureImportance</code> chart uses a horizontal bar orientation to accommodate longer feature names without label truncation, and error bars display the standard deviation of permutation importance scores, conveying uncertainty alongside the point estimate.</p>
+<h2>Ability to Export Reports and Plots</h2>
+<p>The platform provides two distinct export pathways. The <code>ReportGenerator</code> component (<code>frontend/src/components/Reporting/ReportGenerator.jsx</code>) allows users to select PDF or CSV format and trigger generation via the backend API. The backend <code>PDFGenerator</code> service (<code>backend/app/services/reporting/pdf_generator.py</code>) uses the <code>fpdf</code> library to compile a structured document with a title page, section headers, and analytical narrative content. The <code>CSVExporter</code> provides a flat tabular export suitable for import into external statistical tools such as R or SPSS.</p>
+<blockquote>
+<p><strong>[ReportGenerator component with the format dropdown open and the Generate Report button visible]</strong>
+<img alt="alt text" src="image-7.png" />
+The <code>ExportOptions</code> component (<code>frontend/src/components/Reporting/ExportOptions.jsx</code>) extends this with a third option, Word document export, for users who need to embed report content in clinical documentation workflows. This three-format approach reflects the reality that different stakeholders consume analytical output differently: clinical administrators prefer PDF, data teams prefer CSV, and report authors prefer Word.</p>
+<p><strong>[ExportOptions component showing all three export buttons: PDF, CSV, and Word Document]</strong>
+<img alt="alt text" src="image-8.png" /></p>
+</blockquote>
+<h2>Conclusion</h2>
+<p>The reporting architecture of the Telehealth Hypertension Predictive Analytics platform integrates descriptive statistics, interactive visualization, model-level analytics, and structured export into a unified reporting workflow. Each component was designed to serve a specific analytical need, from population-level summary statistics and correlation discovery through to individual patient risk explanation and clinical report dissemination. The result is a reporting layer that does not merely display data but actively supports the clinical reasoning process the platform was built to enhance.</p>
+<h2>References</h2>
+<p>Rhoads, J., &amp; Tanner, C. (2018). <em>Pfenninger and Fowler's procedures for primary care</em> (4th ed.). Elsevier.</p>
+</body>
+</html>

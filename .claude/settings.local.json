@@ -1,7 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:telehealth-hypertension-analytics-vercel-p45feeg88.vercel.app)"
+      "Bash(git -C \"c:\\\\Users\\\\rajac\\\\Documents\\\\gcu_project\\\\telehealth-hypertension-analytics\" status)",
+      "Bash(git -C \"c:\\\\Users\\\\rajac\\\\Documents\\\\gcu_project\\\\telehealth-hypertension-analytics\" remote -v)",
+      "Bash(git -C \"C:\\\\Users\\\\rajac\\\\Downloads\\\\gcu\\\\telehealth-hypertension-analytics\\\\telehealth-hypertension-analytics\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\rajac\\\\Downloads\\\\gcu\\\\telehealth-hypertension-analytics\\\\telehealth-hypertension-analytics\" remote -v)",
+      "PowerShell($src = \"C:\\\\Users\\\\rajac\\\\Downloads\\\\gcu\\\\telehealth-hypertension-analytics\\\\telehealth-hypertension-analytics\"; $dst = \"c:\\\\Users\\\\rajac\\\\Documents\\\\gcu_project\\\\telehealth-hypertension-analytics\"; Get-ChildItem -Recurse -File $src | Where-Object { $_.FullName -notmatch '__pycache__|\\\\.pyc$|node_modules|\\\\.DS_Store' } | ForEach-Object { $rel = $_.FullName.Substring\\($src.Length + 1\\); $dstFile = Join-Path $dst $rel; if \\(-not \\(Test-Path $dstFile\\)\\) { \"NEW: $rel\" } })",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(git reset *)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
