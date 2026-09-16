@@ -22,4 +22,5 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
 shap==0.44.0
-locust==2.32.2slowapi==0.1.9
+locust==2.32.2
+slowapi==0.1.9
