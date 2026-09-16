@@ -24,3 +24,4 @@ python-dotenv==1.0.0
 shap==0.44.0
 locust==2.32.2
 slowapi==0.1.9
+prometheus-fastapi-instrumentator==6.1.0

@@ -60,9 +60,14 @@ if os.path.isdir(_STATIC_DIR):
 # Include the API router
 app.include_router(api_router, prefix="/api")
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Telehealth Hypertension Predictive Analytics System API"}
+
+# Instrument the FastAPI app for Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/api/metrics")
 
 if __name__ == "__main__":
     import uvicorn
