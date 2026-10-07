@@ -18,6 +18,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ABPM staging (24-hour record)
+export const classifyAbpmRecord = async (record) => {
+  const response = await api.post('/api/abpm/classify', record);
+  return response.data;
+};
+
 // Data Exploration
 export const fetchSummaryStatistics = async (datasetId) => {
   const response = await api.post('/api/exploration/statistics', { dataset_id: datasetId });

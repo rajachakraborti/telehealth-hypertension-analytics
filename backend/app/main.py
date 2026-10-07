@@ -17,12 +17,24 @@ def _init_db():
     logger.info("Database: %s", DATABASE_URL)
     db = SessionLocal()
     try:
-        seed_users = [
-            {"username": "admin", "email": "admin@telehealth.com", "hashed_password": "admin123", "role": "administrator", "is_superuser": True},
-            {"username": "clinician", "email": "clinician@telehealth.com", "hashed_password": "clinician123", "role": "clinician", "is_superuser": False},
-            {"username": "analyst", "email": "analyst@telehealth.com", "hashed_password": "analyst123", "role": "data_analyst", "is_superuser": False},
-            {"username": "testuser", "email": "test@example.com", "hashed_password": "testpass123", "role": "clinician", "is_superuser": False},
+        # Demo accounts. Passwords are bcrypt-hashed before storage and can be overridden
+        # per account with SEED_<USERNAME>_PASSWORD; set these on any shared deployment.
+        from app.core.security import get_password_hash
+        demo_accounts = [
+            ("admin", "admin@telehealth.com", "admin123", "administrator", True),
+            ("clinician", "clinician@telehealth.com", "clinician123", "clinician", False),
+            ("analyst", "analyst@telehealth.com", "analyst123", "data_analyst", False),
+            ("testuser", "test@example.com", "testpass123", "clinician", False),
         ]
+        seed_users = []
+        for username, email, default_pw, role, is_super in demo_accounts:
+            if db.query(User).filter(User.username == username).first():
+                continue
+            pw = os.getenv(f"SEED_{username.upper()}_PASSWORD")
+            if not pw:
+                logger.warning("Demo account '%s' uses its built-in password; set SEED_%s_PASSWORD", username, username.upper())
+            seed_users.append(dict(username=username, email=email, role=role, is_superuser=is_super,
+                                   hashed_password=get_password_hash(pw or default_pw)))
         for u in seed_users:
             if not db.query(User).filter(User.username == u["username"]).first():
                 db.add(User(is_active=True, **u))
@@ -44,9 +56,12 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
+# Comma-separated list of allowed browser origins; defaults to "*" for the demo.
+# On a shared deployment set CORS_ORIGINS to the dashboard URL.
+_CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your needs
+    allow_origins=_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import data_ingestion, data_exploration, data_cleaning, modeling, visualization, reporting, pipeline, auth, clinical
+from .endpoints import data_ingestion, data_exploration, data_cleaning, modeling, visualization, reporting, pipeline, auth, clinical, abpm
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(visualization.router, prefix="/visualization", tags=["
 api_router.include_router(reporting.router, prefix="/reporting", tags=["Reporting"])
 api_router.include_router(pipeline.router, prefix="/pipeline", tags=["Pipeline"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(abpm.router, prefix="/abpm", tags=["ABPM Staging (24-hour record)"])

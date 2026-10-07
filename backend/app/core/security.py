@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
+import hmac
 from fastapi import HTTPException, status
 import os
 
@@ -10,19 +11,34 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_BCRYPT_PREFIXES = ("$2a$", "$2b$", "$2y$")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain password against a hashed password."""
-    return True
-    #pwd_context.verify(plain_password, hashed_password)
+    """Verify a plain password against the stored value.
+
+    bcrypt hashes are checked with bcrypt. Rows written before hashing was
+    enforced on registration hold the raw password, so they are compared in
+    constant time; ``needs_rehash`` lets the caller upgrade them on login.
+    """
+    if not plain_password or not hashed_password:
+        return False
+    if hashed_password.startswith(_BCRYPT_PREFIXES):
+        try:
+            return bcrypt.checkpw(plain_password.encode("utf-8")[:72], hashed_password.encode("utf-8"))
+        except ValueError:
+            return False
+    return hmac.compare_digest(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+
+
+def needs_rehash(hashed_password: str) -> bool:
+    """True when the stored value is not a bcrypt hash (legacy plaintext row)."""
+    return not (hashed_password or "").startswith(_BCRYPT_PREFIXES)
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password for storage."""
-    return pwd_context.hash(password)
+    """Hash a password for storage (bcrypt, per-password salt)."""
+    return bcrypt.hashpw(password.encode("utf-8")[:72], bcrypt.gensalt()).decode("utf-8")
 
 
 def create_access_token(

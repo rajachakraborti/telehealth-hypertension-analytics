@@ -1,0 +1,96 @@
+{
+  "model_id": "abpm-xgb-refined-v1",
+  "created_utc": "2026-10-07T20:08:18",
+  "sha256": "88f9906968577954ca57182c5755a996ff34ef7dfabda49a8c616e88305d7de4",
+  "stages": [
+    "Normal",
+    "Elevated",
+    "Stage 1",
+    "Stage 2"
+  ],
+  "features": [
+    "sbp_day",
+    "dbp_day",
+    "sbp_night",
+    "dbp_night",
+    "heart_rate",
+    "age",
+    "bmi",
+    "map_day",
+    "map_night",
+    "pulse_pressure",
+    "dip_ratio"
+  ],
+  "random_state": 42,
+  "hyperparameters": {
+    "colsample_bytree": 0.9989,
+    "learning_rate": 0.0248,
+    "max_depth": 3,
+    "min_child_weight": 2,
+    "n_estimators": 319,
+    "reg_lambda": 0.1268,
+    "subsample": 0.7115
+  },
+  "training": {
+    "n_patients": 1260,
+    "data": "synthetic ABPM cohort, 48 half-hourly readings per patient"
+  },
+  "holdout": {
+    "n": 540,
+    "accuracy": 0.9018518518518519,
+    "macro_f1": 0.9022025653649134,
+    "crisis_recall": 0.9703703703703703,
+    "macro_roc_auc": 0.984023776863283,
+    "brier": 0.14753824943534966,
+    "ece": 0.014427986354739537,
+    "accuracy_ci95": [
+      0.8740277777777778,
+      0.9259259259259259
+    ]
+  },
+  "selection": {
+    "feature_engineering": "RETAIN (design baseline)",
+    "hyperparameter_search": "ADOPT",
+    "isotonic_calibration": "REJECT",
+    "morning_surge_features": "NOT ADOPTED (no supported gain)"
+  },
+  "subgroup_accuracy": {
+    "sex=F": [
+      0.9068100358422939,
+      279,
+      0.034111176693743445
+    ],
+    "sex=M": [
+      0.896551724137931,
+      261,
+      0.03694750538749816
+    ],
+    "age=<45": [
+      0.8602150537634409,
+      93,
+      0.0704771475160658
+    ],
+    "age=45-64": [
+      0.8978328173374613,
+      323,
+      0.033029975895090664
+    ],
+    "age=65+": [
+      0.9435483870967742,
+      124,
+      0.040622392165634874
+    ]
+  },
+  "intended_use": "decision support demo; classify a patient's 24-hour ABPM record into an ACC/AHA stage with explanation",
+  "limitations": [
+    "trained and tested on simulated data whose labels come from the same generator as the features",
+    "not clinically validated; not for diagnosis or treatment decisions",
+    "lowest accuracy for patients under 45 and for the Elevated stage",
+    "errors concentrate within +/-5 mmHg of stage cut-points"
+  ],
+  "versions": {
+    "python": "3.10.11",
+    "xgboost": "2.0.3",
+    "shap": "0.49.1"
+  }
+}

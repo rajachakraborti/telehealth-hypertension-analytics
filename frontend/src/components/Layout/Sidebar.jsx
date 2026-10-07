@@ -20,6 +20,13 @@ const Sidebar = () => {
 
     const menuItems = [
         {
+            title: 'Clinical',
+            key: 'clinical',
+            items: [
+                { path: '/clinical/abpm-classifier', label: 'ABPM Staging' },
+            ]
+        },
+        {
             title: 'Data Ingestion',
             key: 'ingestion',
             items: [

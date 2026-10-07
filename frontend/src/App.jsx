@@ -26,6 +26,7 @@ import PipelineControls from './components/Pipeline/PipelineControls';
 import Login from './components/UserManagement/Login';
 import Register from './components/UserManagement/Register';
 import RoleManagement from './components/UserManagement/RoleManagement';
+import ABPMClassifier from './components/Clinical/ABPMClassifier';
 import Help from './components/Help/Help';
 
 const AppContent = () => {
@@ -44,6 +45,7 @@ const AppContent = () => {
 
           {/* Protected routes */}
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/clinical/abpm-classifier" element={<ProtectedRoute><ABPMClassifier /></ProtectedRoute>} />
           <Route path="/data-ingestion/file-upload" element={<ProtectedRoute><FileUpload /></ProtectedRoute>} />
           <Route path="/data-ingestion/url-import" element={<ProtectedRoute><URLImport /></ProtectedRoute>} />
           <Route path="/data-exploration/summary-statistics" element={<ProtectedRoute><SummaryStatistics /></ProtectedRoute>} />

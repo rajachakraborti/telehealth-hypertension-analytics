@@ -9,7 +9,9 @@ def client():
 def test_upload_valid_file(client):
     response = client.post("/api/data-ingestion/upload", files={"file": ("test.csv", b"col1,col2\n1,2\n3,4")})
     assert response.status_code == 200
-    assert response.json() == {"message": "File uploaded successfully", "filename": "test.csv"}
+    body = response.json()
+    assert body["message"] == "File uploaded successfully" and body["filename"] == "test.csv"
+    assert body["rows"] == 2 and body["columns"] == ["col1", "col2"]
 
 def test_upload_invalid_file_type(client):
     response = client.post("/api/data-ingestion/upload", files={"file": ("test.txt", b"invalid content")})

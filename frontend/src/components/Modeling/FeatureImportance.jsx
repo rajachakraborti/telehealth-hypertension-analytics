@@ -101,9 +101,10 @@ const FeatureImportance = () => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h2>Feature Importance</h2>
+            <h2>Feature Importance (illustrative sample data)</h2>
             <p style={{ marginBottom: '20px', color: '#666' }}>
-                Shows the relative importance of each feature in the trained model's predictions.
+                These bars are placeholder values for the generic modeling workflow and are not computed from a trained model.
+                For real, per-patient explanations of the ABPM staging model, use Clinical &gt; ABPM Staging.
             </p>
             <div style={{ height: '400px', backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                 <Bar data={data} options={options} />
