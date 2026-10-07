@@ -68,6 +68,7 @@ def fig_subgroups():
         ax.text(i, 79.2, f"n={nn}", ha="center", fontsize=8, color="white")
         ax.text(i + 0.12, a + e + 0.6, f"{a:.1f}%", ha="left", fontsize=8.5, color=INK, fontweight="bold")
     ax.set_ylim(78, 106); ax.set_ylabel("Holdout accuracy (%)")
+    ax.set_yticks(range(80, 101, 5))
     ax.legend(loc="upper left", frameon=False, fontsize=8.5)
     ax.set_title("Accuracy by subgroup (95% CI); under-45 is lowest", fontsize=10, loc="left")
     plt.tight_layout(); plt.savefig(f"{OUT}/topic7_subgroups.png"); plt.close()
