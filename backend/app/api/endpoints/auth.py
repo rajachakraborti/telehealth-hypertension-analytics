@@ -112,3 +112,15 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return {"msg": "User registered successfully"}
+
+
+@router.get("/users/me")
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    """Profile of the signed-in user. The dashboard calls this on every page load to restore the session."""
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "role": current_user.role,
+        "is_active": current_user.is_active,
+    }

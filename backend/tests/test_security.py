@@ -87,3 +87,15 @@ def test_legacy_plaintext_user_is_upgraded_on_login():
         db.query(User).filter(User.username == name).delete()
         db.commit()
         db.close()
+
+
+def test_current_user_endpoint_restores_session(new_user):
+    token = _login(new_user, "S3cret-pass").json()["access_token"]
+    r = client.get("/api/auth/users/me", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    assert r.json()["username"] == new_user and r.json()["role"] == "clinician"
+    assert "hashed_password" not in r.json()
+
+
+def test_current_user_endpoint_requires_token():
+    assert client.get("/api/auth/users/me").status_code == 401

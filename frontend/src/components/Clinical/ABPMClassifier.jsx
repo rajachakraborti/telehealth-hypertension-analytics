@@ -67,7 +67,7 @@ const ABPMClassifier = () => {
     };
     const drivers = result ? result.explanation.top_drivers : [];
     const shapData = result && {
-        labels: drivers.map((d) => `${d.label} (${d.value})`),
+        labels: drivers.map((d) => `${d.label.replace('mean arterial pressure', 'MAP').replace('night-time', 'night')} (${Number(d.value).toFixed(1)})`),
         datasets: [{
             label: `Contribution toward ${result.stage}`,
             data: drivers.map((d) => d.shap),
@@ -123,7 +123,7 @@ const ABPMClassifier = () => {
                                 Confidence is below {Math.round(result.review_threshold * 100)}%: manual clinician review recommended.
                             </p>
                         )}
-                        <p>{result.explanation.narrative}</p>
+                        <p>{result.explanation.narrative.replace(/^Predicted stage: [^.]*\.\s*/, '')}</p>
                         {result.data_quality.warnings.map((w) => <p key={w} style={{ color: '#b7791f' }}>{w}</p>)}
                         <small style={{ color: '#4a5568' }}>
                             {result.data_quality.valid_readings} valid readings ({result.data_quality.day_readings} awake,{' '}
