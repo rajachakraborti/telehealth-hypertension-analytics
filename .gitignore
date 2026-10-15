@@ -37,3 +37,9 @@ Thumbs.db
 .pytest_cache/
 htmlcov/
 .coverage
+
+# Large generated media: ship in the submission package, not in git
+artifacts/narration/
+*.mp4
+Topic_7_Capstone_Presentation_Narrated.pptx
+submissions/*.zip

@@ -1,4 +1,4 @@
-"""Build Topic_7_Capstone_Presentation.pptx (9 slides) from the notebook's saved metrics.
+"""Build Topic_7_Capstone_Presentation.pptx (10 slides) from the notebook's saved metrics.
 
 Every number on the slides is read from artifacts/topic6/topic6_metrics.json, so the deck cannot drift
 from the results. Run from the repository root:
@@ -90,7 +90,7 @@ text(s, Inches(0.9), Inches(4.4), Inches(11.5), Inches(1.6),
       f"github.com/rajachakraborti/telehealth-hypertension-analytics  |  tag {TAG}  |  commit {COMMIT}"], size=16, color=RGBColor(255, 255, 255))
 s.notes_slide.notes_text_frame.text = (
     "This is the completion-phase summary of my capstone: a decision-support system that stages hypertension from a patient's 24-hour blood pressure record. "
-    "In the next nine minutes: the problem, what I built, how I chose the model, the results, what a technical audit of the whole project found, and what I would do next. "
+    "In the next few minutes: the problem, what I built, how I chose the model, the results, what a technical audit of the whole project found, and what I would do next. "
     f"Everything here traces to the repository at tag {TAG}.")
 
 # ---------------- 2. Problem ----------------
@@ -118,6 +118,23 @@ bullets(s, Inches(9.9), Inches(1.9), Inches(3.1), Inches(4.9), [
     [("Explained: ", True, INK), ("exact TreeSHAP drivers, signed", False, INK)],
     [("Safe by default: ", True, INK), ("flags confidence under 65% for manual review", False, INK)],
     [("Secured: ", True, INK), ("bcrypt passwords, JWT roles, rate limit, encrypted PHI columns", False, INK)]], size=15)
+
+# ---------------- 3b. Product walkthrough ----------------
+s = base("Clinicians see the stage, the reasons and a review flag",
+         "Screens from the running dashboard, using a simulated record",
+         "Here is what a clinician actually sees. On the left is the ABPM Staging page. The clinician loads a patient's 24-hour record and clicks classify. "
+         "The page shows the predicted stage with its confidence, the probability for each of the four stages, and the four measurements that pushed the prediction, drawn from the exact Shapley attributions. "
+         "In this example the model calls Stage 1 with 99 percent confidence, and it explains that night-time pressure dominates and that the nocturnal dip is blunted, only 7 percent. "
+         "If confidence were below 65 percent, a banner would recommend manual review, and every result carries a disclaimer that the model is trained on simulated data. "
+         "On the right are two more screens from the same app: summary statistics for an uploaded dataset, and the dashboard with its risk score. Sign-in is role-based, so only clinicians and administrators can classify a record.")
+h = picture(s, os.path.join(ROOT, "artifacts/ui/ui_poster_crop.png"), Inches(0.6), Inches(1.85), Inches(7.6), Inches(3.7))
+text(s, Inches(0.6), Inches(5.55), Inches(7.6), Inches(0.4), "ABPM Staging: predicted stage, probabilities, and signed drivers", size=14, color=MUTED)
+bullets(s, Inches(0.6), Inches(6.0), Inches(7.8), Inches(1.0), [
+    [("Every result ", True, INK), ("carries a disclaimer; confidence under 65% triggers a review banner", False, INK)]], size=16)
+picture(s, os.path.join(ROOT, "artifacts/ui/tour/tour_2_summary.png"), Inches(8.7), Inches(1.85), Inches(3.9), Inches(2.3))
+text(s, Inches(8.7), Inches(4.15), Inches(3.9), Inches(0.4), "Upload data: summary statistics", size=14, color=MUTED)
+picture(s, os.path.join(ROOT, "artifacts/ui/tour/tour_3_dashboard.png"), Inches(8.7), Inches(4.65), Inches(3.9), Inches(2.3))
+text(s, Inches(8.7), Inches(6.9), Inches(3.9), Inches(0.3), "Dashboard: risk score", size=14, color=MUTED)
 
 # ---------------- 4. Data and method ----------------
 s = base("Each patient is a 24-hour record reduced to 11 clinical features",
@@ -213,7 +230,7 @@ s = base("Next: prove it on real data, then predict outcomes",
          "My recommendations follow from the audit rather than from a wish list. First, nothing here is clinically validated, so the priority is an external test on real ambulatory data, reported to the TRIPOD+AI standard. "
          "Second, because the stage labels are produced by the same guideline thresholds the model learns, the more valuable target is a real outcome, such as confirmed hypertension or cardiovascular events. "
          "Third, my 65 percent review threshold is a policy choice, not a validated one; conformal prediction gives sets with a coverage guarantee, which suits boundary cases. "
-         "Fourth, close the loop I had only drawn: log clinician overrides, monitor drift, and publish a model card per release. Fifth, check performance by age and sex on a larger sample. Deep sequence models only make sense once real raw waveform data exists.")
+         "Fourth, close the loop I had only drawn: log clinician overrides, monitor drift, and publish a model card per release. Fifth, check performance by age and sex on a larger sample. Deep sequence models only make sense once real raw waveform data exists. Thank you; I am happy to take questions.")
 recs = [("1  Validate externally", "All evidence is synthetic. Test on real multi-site ABPM data and report to TRIPOD+AI (Collins et al., 2024).", NAVY),
         ("2  Predict outcomes, not stage", "Stage labels come from the same thresholds the model learns, so it mostly re-learns a rule.", NAVY),
         ("3  Add conformal prediction sets", "The 65% review cut-off is unvalidated; sets with a coverage guarantee suit boundary cases (Angelopoulos & Bates, 2023).", NAVY),

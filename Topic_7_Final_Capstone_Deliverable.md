@@ -118,16 +118,17 @@ Whelton, P. K., Carey, R. M., Aronow, W. S., Casey, D. E., Collins, K. J., Himme
 
 # Part 3: Presentation
 
-The slide deck (`Topic_7_Capstone_Presentation.pptx`, 9 slides, with speaker notes) follows the structure of this report. Every number on the slides is read from the notebook's saved metrics.
+The slide deck (`Topic_7_Capstone_Presentation.pptx`, 10 slides, with speaker notes) follows the structure of this report. A narrated version with audio on every slide is provided as `Topic_7_Capstone_Presentation_Narrated.pptx` and `.mp4`. Every number on the slides is read from the notebook's saved metrics.
 
 | Slide | Title | Visual aid |
 |---|---|---|
 | 1 | Telehealth Hypertension Analytics | Title, repository and release tag |
 | 2 | A single office reading misjudges about one patient in four | Office versus ABPM scatter |
 | 3 | A staging API and dashboard page serve the refined model | Architecture as built |
-| 4 | Each patient is a 24-hour record reduced to 11 clinical features | Mean 24-hour systolic profiles |
-| 5 | Cross-validation chose the model; the holdout chose nothing | Selection chart |
-| 6 | 90.2% accuracy and 97% Stage 2 recall, with the uncertainty shown | Benchmark chart with intervals |
-| 7 | The audit found real gaps between the claims and the code | Findings table |
-| 8 | Where it fails: near stage cut-points, and for younger patients | Error and subgroup charts |
-| 9 | Next: prove it on real data, then predict outcomes | Five recommendations with sources |
+| 4 | Clinicians see the stage, the reasons and a review flag | Screenshots of the running dashboard |
+| 5 | Each patient is a 24-hour record reduced to 11 clinical features | Mean 24-hour systolic profiles |
+| 6 | Cross-validation chose the model; the holdout chose nothing | Selection chart |
+| 7 | 90.2% accuracy and 97% Stage 2 recall, with the uncertainty shown | Benchmark chart with intervals |
+| 8 | The audit found real gaps between the claims and the code | Findings table |
+| 9 | Where it fails: near stage cut-points, and for younger patients | Error and subgroup charts |
+| 10 | Next: prove it on real data, then predict outcomes | Five recommendations with sources |

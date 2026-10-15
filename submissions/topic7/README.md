@@ -5,7 +5,8 @@ Student: Raja Chakraborty | DSC-590 | Instructor: Jonathan Pollyn | October 7, 2
 | File | Contents |
 |---|---|
 | `Topic_7_Final_Capstone_Deliverable.pdf` / `.docx` | Part 1 technical audit, Part 2 scientific report (1,091 words), Part 3 slide outline, references |
-| `Topic_7_Capstone_Presentation.pptx` | 9-slide deck with speaker notes |
+| `Topic_7_Capstone_Presentation.pptx` | 10-slide deck with speaker notes |
+| `Topic_7_Capstone_Presentation_Narrated.pptx` / `.mp4` | The same deck with audio narration on every slide (about 8 minutes). Included in the submission package; not stored in git because of file size. `narration_script.md` at the repository root is the script, and `scripts/build_narrated_deck.py` rebuilds both |
 
 - Repository: https://github.com/rajachakraborti/telehealth-hypertension-analytics
 - Release tag: `topic7-submission`
