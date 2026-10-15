@@ -25,3 +25,22 @@ def test_prepare_visualization_data(sample_data):
     assert 'age' in visualization_data[0]
     assert 'systolic' in visualization_data[0]
     assert 'diastolic' in visualization_data[0]
+
+
+def test_dashboard_matches_columns_regardless_of_case(tmp_path):
+    """The shipped sample uses 'Hypertension' and 'SystolicBP'; the risk score must not silently fall back to 0%."""
+    import asyncio
+    from app.api.endpoints.data_exploration import DatasetRequest, get_dashboard
+    csv = tmp_path / "patients.csv"
+    csv.write_text("PatientID,Age,SystolicBP,Hypertension\n1,50,150,1\n2,40,120,0\n3,60,160,1\n4,30,110,0\n")
+    out = asyncio.run(get_dashboard(DatasetRequest(dataset_id=str(csv))))
+    assert out["risk_score"] == 50.0 and out["total_patients"] == 4
+    assert out["stats"]["systolic_bp"] == 135.0
+
+
+def test_dashboard_falls_back_to_systolic_when_no_label_column(tmp_path):
+    import asyncio
+    from app.api.endpoints.data_exploration import DatasetRequest, get_dashboard
+    csv = tmp_path / "bp.csv"
+    csv.write_text("Systolic_BP\n150\n150\n")
+    assert asyncio.run(get_dashboard(DatasetRequest(dataset_id=str(csv))))["risk_score"] == 50.0

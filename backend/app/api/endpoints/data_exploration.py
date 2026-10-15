@@ -1,4 +1,5 @@
 import math
+import re
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.services.data_exploration.statistics import calculate_statistics, load_dataframe, _scalar
@@ -9,6 +10,13 @@ router = APIRouter()
 
 class DatasetRequest(BaseModel):
     dataset_id: str
+
+
+def find_column(df, name: str):
+    """Find a column ignoring case, spaces and underscores ('SystolicBP' matches 'systolic_bp')."""
+    key = lambda c: re.sub(r"[^a-z0-9]", "", str(c).lower())
+    lookup = {key(c): c for c in df.columns}
+    return lookup.get(key(name))
 
 
 @router.post("/statistics")
@@ -60,16 +68,18 @@ async def get_dashboard(request: DatasetRequest):
         # Risk score: % of positive hypertension cases if column exists,
         # otherwise normalise mean systolic BP (120=0%, 180=100%).
         risk_score = 0.0
-        if "hypertension" in df.columns:
-            risk_score = round(float(df["hypertension"].mean() * 100), 1)
-        elif "systolic_bp" in df.columns:
-            mean_sbp = float(df["systolic_bp"].mean())
+        htn_col, sbp_col = find_column(df, "hypertension"), find_column(df, "systolic_bp")
+        if htn_col:
+            risk_score = round(float(df[htn_col].mean() * 100), 1)
+        elif sbp_col:
+            mean_sbp = float(df[sbp_col].mean())
             risk_score = round(max(0.0, min(100.0, (mean_sbp - 120) / 60 * 100)), 1)
 
         stats = {}
-        for col in ("age", "systolic_bp", "diastolic_bp", "bmi", "cholesterol"):
-            if col in df.columns:
-                stats[col] = round(float(df[col].mean()), 1)
+        for name in ("age", "systolic_bp", "diastolic_bp", "bmi", "cholesterol"):
+            col = find_column(df, name)
+            if col:
+                stats[name] = round(float(df[col].mean()), 1)
 
         return {
             "risk_score": risk_score,

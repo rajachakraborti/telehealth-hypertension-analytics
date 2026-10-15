@@ -145,18 +145,18 @@ b = lambda t: (t, {"bold": True})
 n = lambda t: (t, {})
 
 # ------------------------------------------------------------------ header
-header_box.top, header_box.height = 0, Inches(6.82)
-textbox(1.0, 0.7, 26.8, 2.1, ["Telehealth Hypertension Analytics"], size=104, color=WHITE, bold=True, after=0)
-textbox(1.0, 2.95, 26.8, 1.0, ["Explained, audited blood pressure staging from 24-hour monitoring"], size=50, color="E6D9F5", after=0)
-textbox(1.0, 4.35, 26.8, 2.2, [
+header_box.top, header_box.height = 0, Inches(5.7)
+textbox(1.0, 0.5, 26.8, 2.0, ["Telehealth Hypertension Analytics"], size=104, color=WHITE, bold=True, after=0)
+textbox(1.0, 2.2, 26.8, 1.0, ["Explained, audited blood pressure staging from 24-hour monitoring"], size=50, color="E6D9F5", after=0)
+textbox(1.0, 3.45, 26.8, 2.0, [
     [("Raja Chakraborty", {"bold": True}), (", M.S. in Data Science  |  " + EMAIL, {})],
     "Faculty advisor: Jonathan Pollyn  |  DSC-590 Data Science Capstone  |  Grand Canyon University"], size=38, color=WHITE, after=6)
-rect(28.7, 0.6, 5.9, 5.9, WHITE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.06)
-logo.left, logo.top, logo.width, logo.height = Inches(28.95), Inches(0.85), Inches(5.4), Inches(5.4)
+rect(29.2, 0.5, 5.2, 4.7, WHITE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.06)
+logo.left, logo.top, logo.width, logo.height = Inches(29.55), Inches(0.65), Inches(4.5), Inches(4.5)
 slide.shapes._spTree.remove(logo._element); slide.shapes._spTree.append(logo._element)   # keep logo above its panel
 
 # ------------------------------------------------------------------ geometry
-X = [1.0, 12.6, 24.2]; W = 10.8; TOP = 7.7; BOTTOM = 41.3
+X = [1.0, 12.6, 24.2]; W = 10.8; TOP = 6.7; BOTTOM = 41.3
 
 # ================= column 1: description + justification =================
 x, y = X[0], TOP
@@ -182,7 +182,13 @@ y = body(x, y, W, [
     [b("What was built. "), n("A machine learning model, a secured web service (API), a dashboard page and 44 automated tests, released together as one tagged version on GitHub.")],
     [b("Data. "), n("Real patient records are protected, so every result here uses 1,800 simulated patients.")],
 ])
-y += 0.35
+tour = ["tour_1_login.png", "tour_2_summary.png", "tour_3_dashboard.png"]
+tw_, tg_ = 3.4, 0.3
+for i, f in enumerate(tour):
+    picture(os.path.join(ROOT, "artifacts/ui/tour", f), x + i * (tw_ + tg_), y, tw_)
+y += tw_ / 1.7 + 0.2
+y = caption(x, y, W, "Screens from the running app: (1) role-based sign-in, (2) data upload with summary statistics, (3) dashboard with a risk score.")
+y += 0.1
 
 y = section(x, y, W, "2", "Project Justification")
 y = body(x, y, W, [
@@ -192,9 +198,9 @@ y = body(x, y, W, [
 cw3 = (W - 0.6) / 3
 for i, (big, lab) in enumerate([(f"{disagree * 100:.1f}%", "one office reading disagrees with true status"), (f"{office_acc * 100:.0f}%", "office-rule staging accuracy"),
                                 ("48", "readings per patient to review by hand")]):
-    stat_card(x + i * (cw3 + 0.3), y, cw3, 3.1, big, lab, big_size=66)
-y += 3.1 + 0.4
-h = picture(os.path.join(ROOT, "artifacts/topic6/topic6_fig8_office_vs_abpm.png"), x, y, 9.4, col_w=W)
+    stat_card(x + i * (cw3 + 0.3), y, cw3, 2.8, big, lab, big_size=64)
+y += 2.8 + 0.4
+h = picture(os.path.join(ROOT, "artifacts/topic6/topic6_fig8_office_vs_abpm.png"), x, y, 7.6, col_w=W)
 y += h + 0.2
 y = caption(x, y, W, "Each dot is a simulated patient. Orange: high in clinic but not hypertensive (white-coat). Green: normal in clinic but hypertensive (masked).")
 col1_end = y
@@ -235,7 +241,7 @@ stages = [("Define requirements", "Clinical need, staging rules and security nee
           ("Build the service", "Secured API and dashboard page; model, model card and tests released together"),
           ("Audit the whole project", "Claims checked against the code; security and evaluation gaps found and fixed"),
           ("Report honestly", "Limits and open issues published with the results")]
-step_h = 1.6
+step_h = 1.75
 line_x = x + 0.5
 rect(line_x - 0.04, y + 0.5, 0.08, step_h * (len(stages) - 1), BORDER)
 for i, (head, desc) in enumerate(stages):
@@ -246,7 +252,7 @@ for i, (head, desc) in enumerate(stages):
     tf.paragraphs[0].alignment = PP_ALIGN.CENTER
     textbox(x + 1.4, sy - 0.05, W - 1.4, step_h, [[(head, {"bold": True, "color": PURPLE, "size": 30})], [(desc, {"size": 25})]], size=25, after=2)
 y += step_h * len(stages) + 0.1
-h = picture(os.path.join(ROOT, "artifacts/topic7/topic7_architecture.png"), x, y, 9.8, col_w=W)
+h = picture(os.path.join(ROOT, "artifacts/topic7/topic7_architecture.png"), x, y, 10.2, col_w=W)
 y += h + 0.2
 y = caption(x, y, W, "System as built. The dashed box (clinician override logging and retraining) is planned, not implemented.")
 col2_end = y
@@ -258,8 +264,8 @@ cw2 = (W - 0.4) / 2
 cards = [(f"{acc * 100:.1f}%", "of 540 unseen patients staged correctly"), (f"{crisis_recall * 100:.0f}%", f"of Stage 2 patients caught ({caught} of {n_crisis})"),
          (f"{off_by_two}", "patients staged more than one step from the true stage"), (f"{latency:.0f} ms", "to predict and explain one patient")]
 for i, (big, lab) in enumerate(cards):
-    stat_card(x + (i % 2) * (cw2 + 0.4), y + (i // 2) * 3.35, cw2, 3.05, big, lab, big_size=72)
-y += 2 * 3.35 + 0.2
+    stat_card(x + (i % 2) * (cw2 + 0.4), y + (i // 2) * 3.8, cw2, 3.4, big, lab, big_size=76)
+y += 2 * 3.8 + 0.2
 h = picture(os.path.join(ROOT, "artifacts/topic7/topic7_benchmarks.png"), x, y, W)
 y += h + 0.2
 y = caption(x, y, W, f"Accuracy on patients the model never saw. Rules on one office reading or the daytime average are right {office_acc * 100:.0f}% and {abpm_acc * 100:.0f}% of the time. "

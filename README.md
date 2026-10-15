@@ -2,6 +2,8 @@
 
 This repository contains the backend API and machine learning pipeline for a telehealth system designed to monitor and predict hypertensive crises using synthetic Ambulatory Blood Pressure Monitoring (ABPM) telemetry.
 
+> **Reviewing this project?** Start with [PROGRESS.md](PROGRESS.md): it maps every milestone (Topics 1 to 8) to its deliverable and to the commits and code that support it. Final deliverables are in `submissions/`.
+
 ## Architecture & Features
 * **ABPM staging model (current)**: XGBoost classifier that stages a patient's full 24-hour ambulatory record (Normal, Elevated, Stage 1, Stage 2). Served at `POST /api/abpm/classify`; trained and evaluated in `Topic_6_Advanced_Analysis_and_Model_Refinement.ipynb`.
 * **Legacy per-reading models**: the original XGBoost/Isolation Forest pair under `/api/modeling`. Superseded by the ABPM staging model; its split is by reading, not by patient (see the audit report).
@@ -56,3 +58,26 @@ Run the test suite using pytest to verify statistical boundaries and API securit
 cd backend
 pytest tests/
 ```
+
+### 6. Reproduce the results
+Requirements: Python 3.10 and Node 20 (for the dashboard). The report, deck and poster builders (`build_*.py`) also need Windows with Microsoft Office; everything else runs on any OS.
+```bash
+git clone https://github.com/rajachakraborti/telehealth-hypertension-analytics.git
+cd telehealth-hypertension-analytics
+python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r backend/requirements.txt
+
+# 1. Tests (about 30 seconds). Expect: 48 passed
+cd backend && pytest && cd ..
+
+# 2. Rebuild the model, metrics and figures (about 10 minutes; executes the notebook in place)
+python scripts/run_notebook.py Topic_6_Advanced_Analysis_and_Model_Refinement.ipynb
+python scripts/make_topic7_figures.py
+
+# 3. Run the app: backend in one terminal, dashboard in another
+cd backend && python -m uvicorn app.main:app --port 8000
+cd frontend && npm install && npm run dev               # http://localhost:3000
+```
+Sign in with `clinician` / `clinician123` (demo account), open **Clinical > ABPM Staging**, load a sample record and click **Classify record**.
+
+After step 2, `artifacts/topic6/topic6_metrics.json` should show holdout accuracy 0.902, Stage 2 recall 0.970, macro ROC-AUC 0.984 and ECE 0.014, with hyperparameter search adopted and isotonic calibration rejected. Random seeds are fixed (42), so results repeat on the same library versions. Step 2 also rewrites `backend/models_saved/abpm_xgb_refined.json`; the parity test in step 1 checks that the API reproduces the notebook's features and probabilities.
